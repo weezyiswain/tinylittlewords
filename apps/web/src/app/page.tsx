@@ -1,11 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
-import { getRandomAvatar } from "@/lib/avatars";
+import { AVATAR_OPTIONS, getRandomAvatar } from "@/lib/avatars";
 import { supabase } from "@/lib/supabaseClient";
+import { canonicalUrl, seoConfig } from "@/lib/seo";
 
 const WORD_LENGTH_OPTIONS = [3, 4, 5] as const;
 const AGE_SHORT_COPY: Record<(typeof WORD_LENGTH_OPTIONS)[number], string> = {
@@ -23,7 +25,7 @@ export default function Home() {
   const router = useRouter();
   const [selectedLength, setSelectedLength] =
     useState<(typeof WORD_LENGTH_OPTIONS)[number]>(4);
-  const [avatar, setAvatar] = useState(() => getRandomAvatar());
+  const [avatar, setAvatar] = useState(() => AVATAR_OPTIONS[0]);
   const [packs, setPacks] = useState<Pack[]>([]);
   const [packsLoading, setPacksLoading] = useState(true);
   const [packsError, setPacksError] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export default function Home() {
 
   useEffect(() => {
     let isCancelled = false;
+    setAvatar(getRandomAvatar());
 
     const fetchPacks = async () => {
       setPacksLoading(true);
@@ -76,7 +79,10 @@ export default function Home() {
           err instanceof Error ? err.message : "Unknown Supabase error.";
         if (!isCancelled) {
           setPacksError(message);
-          console.error("[Supabase] Failed to load packs:", message);
+          console.warn(
+            "[Supabase] Packs request fell back to surprise mode:",
+            message
+          );
         }
       } finally {
         if (!isCancelled) {
@@ -91,6 +97,44 @@ export default function Home() {
       isCancelled = true;
     };
   }, []);
+
+  const homeCanonical = useMemo(() => canonicalUrl("/"), []);
+
+  const structuredData = useMemo(() => {
+    const packName = selectedPack?.title ?? "All packs";
+    return {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: seoConfig.siteName,
+      url: homeCanonical,
+      description: seoConfig.defaultDescription,
+      inLanguage: "en-US",
+      isFamilyFriendly: true,
+      genre: ["Educational", "Puzzle", "Kids"],
+      publisher: {
+        "@type": "Organization",
+        name: "Tiny Little Words",
+        url: seoConfig.siteUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: `${seoConfig.siteUrl}/icon.png`,
+        },
+      },
+      potentialAction: [
+        {
+          "@type": "PlayAction",
+          target: `${seoConfig.siteUrl}/play`,
+          name: `Play a ${selectedLength}-letter word puzzle`,
+        },
+        {
+          "@type": "ChooseAction",
+          target: `${seoConfig.siteUrl}/play?pack=${selectedPack?.id ?? ""}`,
+          name: `Choose pack: ${packName}`,
+          actionOption: packName,
+        },
+      ],
+    };
+  }, [homeCanonical, selectedLength, selectedPack]);
 
   const handleStart = () => {
     const seed = Date.now();
@@ -114,6 +158,11 @@ export default function Home() {
 
   return (
     <main className="min-h-dvh px-6 py-10 sm:px-10 grid place-items-center">
+      <Script
+        id="home-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
