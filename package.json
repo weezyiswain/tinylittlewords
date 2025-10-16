@@ -1,0 +1,28 @@
+{
+  "name": "TinyLittleWords",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  },
+  "packageManager": "npm@10.9.0",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.0",
+    "framer-motion": "^12.23.24",
+    "next-pwa": "^5.6.0"
+  }
+}
