@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -14,6 +15,14 @@ import {
 import { getFallbackPuzzles, Puzzle } from "@/lib/game-data";
 import { addWordToDictionary, isValidWord } from "@/lib/dictionary";
 import { supabase } from "@/lib/supabaseClient";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 type LetterStatus = "correct" | "present" | "absent";
 
@@ -36,14 +45,18 @@ const SUPPORTED_LENGTHS = [3, 4, 5] as const;
 
 function buildHints(word: string): string[] {
   const upper = word.toUpperCase();
-  const baseHints = [
-    `This word has ${upper.length} letters.`,
+  const hints: string[] = [
     `It starts with "${upper[0]}".`,
     `It ends with "${upper[upper.length - 1]}".`,
   ];
 
-  const hintCount = upper.length >= 5 ? 2 : 1;
-  return baseHints.slice(0, hintCount);
+  if (upper.length >= 5) {
+    hints.push(
+      `Watch for the letter "${upper[Math.floor(upper.length / 2)]}" in the middle.`
+    );
+  }
+
+  return hints.slice(0, upper.length >= 5 ? 2 : 1);
 }
 
 function getDayOfYear(date: Date): number {
@@ -58,7 +71,6 @@ function getDayOfYear(date: Date): number {
 type HintListProps = {
   hints: string[];
   revealed: boolean[];
-  hintsLeft: number;
   onReveal: (index: number) => void;
   className?: string;
   highlight?: boolean;
@@ -67,7 +79,6 @@ type HintListProps = {
 function HintList({
   hints,
   revealed,
-  hintsLeft,
   onReveal,
   className,
   highlight = false,
@@ -90,22 +101,11 @@ function HintList({
           highlight && "text-amber-700"
         )}
       >
-        Helpful hints
+        Hints
       </h2>
-      <p
-        className={cn(
-          "mt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground",
-          highlight && "text-amber-600"
-        )}
-      >
-        Tap to reveal.{" "}
-        {hintsLeft > 0
-          ? `${hintsLeft} hint${hintsLeft === 1 ? "" : "s"} left.`
-          : "All hints unlocked!"}
-      </p>
-      <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+      <ul className="mt-2 space-y-2 overflow-y-auto pr-1 text-sm text-muted-foreground sm:max-h-40 max-h-28">
         {hints.length === 0 ? (
-          <li className="rounded-lg border border-dashed border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+          <li className="rounded-lg border border-dashed border-primary/20 bg-primary/5 px-3 py-1.5 text-xs text-muted-foreground">
             No hints just yet—trust your instincts!
           </li>
         ) : (
@@ -115,14 +115,14 @@ function HintList({
               <li
                 key={hint}
                 className={cn(
-                  "flex items-start gap-2 rounded-lg border border-transparent px-2 py-1 transition",
+                  "flex items-center gap-2 rounded-lg border border-transparent px-2 py-1 transition",
                   isRevealed
                     ? "border-primary/20 bg-primary/5"
                     : "hover:border-primary/20 hover:bg-primary/5"
                 )}
               >
-                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {index + 1}
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm text-primary">
+                  💡
                 </span>
                 {isRevealed ? (
                   <span className="text-foreground">{hint}</span>
@@ -131,7 +131,7 @@ function HintList({
                     type="button"
                     onClick={() => onReveal(index)}
                     className={cn(
-                      "inline-flex items-center rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary shadow-sm transition hover:border-primary/40 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      "inline-flex w-full items-center justify-center rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary shadow-sm transition hover:border-primary/40 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       showButtonHighlight && index === firstHiddenIndex
                         ? "border-amber-400 bg-amber-100 text-amber-700 animate-bounce"
                         : ""
@@ -213,7 +213,6 @@ export default function PlayPage() {
   const [wordSource, setWordSource] = useState<"supabase" | "fallback">(
     "fallback"
   );
-  const [isLoadingWords, setIsLoadingWords] = useState(false);
   const [wordFetchError, setWordFetchError] = useState<string | null>(null);
 
   const [guesses, setGuesses] = useState<string[]>([]);
@@ -234,7 +233,6 @@ export default function PlayPage() {
     let isCancelled = false;
 
     const loadWords = async () => {
-      setIsLoadingWords(true);
       setWordFetchError(null);
 
       try {
@@ -288,7 +286,6 @@ export default function PlayPage() {
 
           setWordPool(puzzles);
           setWordSource("supabase");
-          setIsLoadingWords(false);
 
           console.log(
             `[Supabase] Loaded ${puzzles.length} words for length ${wordLength}${
@@ -329,7 +326,6 @@ export default function PlayPage() {
       );
       setWordPool(fallbackPool);
       setWordSource("fallback");
-      setIsLoadingWords(false);
 
       if (fallbackPool.length === 0) {
         console.warn(
@@ -386,8 +382,6 @@ export default function PlayPage() {
   const shouldHighlightHints =
     (isFinalChanceWithHint || (showRetryPrompt && hasHintAvailable)) &&
     !isSolved;
-  const highlightFinalChance =
-    Boolean(currentPuzzle) && isFinalChanceWithHint;
 
   const updateKeyboard = useCallback(
     (guess: string, evaluation: LetterStatus[]) => {
@@ -562,32 +556,96 @@ export default function PlayPage() {
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {wordLength} letter word
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                {triesLeft} tries left
-              </p>
-              {packName ? (
-                <p className="text-xs text-muted-foreground">Pack: {packName}</p>
-              ) : (
-                <p className="text-xs text-muted-foreground">Pack: Surprise mix</p>
-              )}
-              <p
-                className={cn(
-                  "text-[11px] font-semibold uppercase tracking-wide",
-                  wordSource === "supabase"
-                    ? "text-emerald-600"
-                    : "text-amber-600"
+            <div className="flex items-start gap-2">
+              <div className="text-right">
+                {packName ? (
+                  <p className="text-xs text-muted-foreground">Pack: {packName}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Pack: Surprise mix</p>
                 )}
-              >
-                {wordSource === "supabase"
-                  ? isLoadingWords
-                    ? "Loading live words…"
-                    : "Live Supabase words"
-                  : "Offline backup words"}
-              </p>
+              </div>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-white text-muted-foreground shadow-sm transition hover:border-primary/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+                    aria-label="How to play"
+                  >
+                    <HelpCircle className="h-5 w-5" aria-hidden />
+                  </button>
+                </SheetTrigger>
+                <SheetContent
+                  side="bottom"
+                  className="max-h-[85dvh] w-full rounded-t-3xl border-t border-border bg-background px-4 pb-6 pt-5 sm:px-6"
+                >
+                  <SheetHeader className="pb-2 text-center">
+                    <SheetTitle className="text-xl font-bold text-foreground">
+                      How to Play
+                    </SheetTitle>
+                    <SheetDescription className="text-sm text-muted-foreground">
+                      Guess the secret word in {MAX_GUESSES} tries. Use the colors after each guess to steer your next one!
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="space-y-5 overflow-y-auto pb-6">
+                    <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                        <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+                        The Goal
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Type a {wordLength}-letter word. Keep trying until every tile shines green!
+                      </p>
+                    </section>
+
+                    <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                        <Lightbulb className="h-5 w-5 text-amber-500" aria-hidden />
+                        Color Detective Guide
+                      </h3>
+                    <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
+                      <li className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
+                          😀
+                        </span>
+                        <span className="font-semibold text-emerald-700">
+                          Green = Perfect spot
+                        </span>
+                      </li>
+                      <li className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white">
+                          😮
+                        </span>
+                        <span className="font-semibold text-amber-700">
+                          Yellow = Move me
+                        </span>
+                      </li>
+                      <li className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted-foreground/60 text-xs font-bold text-white">
+                          😴
+                        </span>
+                        <span className="font-semibold text-foreground">
+                          Gray = Not in word
+                        </span>
+                      </li>
+                    </ul>
+                    </section>
+
+                    <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                        <Star className="h-5 w-5 text-rose-500" aria-hidden />
+                        Super Star Tips
+                      </h3>
+                      <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                        <li>
+                          Start with different letters like <span className="font-semibold text-foreground">RAIN</span> or <span className="font-semibold text-foreground">BIRD</span>.
+                        </li>
+                        <li>Look at the hints above the keyboard—they’re friendly clue cards.</li>
+                        <li>If you’re stuck, peek at a hint or try swapping the letters around.</li>
+                      </ul>
+                    </section>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </header>
 
@@ -641,27 +699,9 @@ export default function PlayPage() {
               })}
             </div>
 
-            {statusMessage ? (
+            {statusMessage && (
               <div className="rounded-lg border border-border bg-white/90 px-4 py-3 text-sm font-medium text-foreground shadow-sm">
                 {statusMessage}
-              </div>
-            ) : (
-              <div
-                className={cn(
-                  "rounded-lg border border-dashed border-primary/30 bg-primary/5 px-4 py-3 text-sm text-muted-foreground",
-                  highlightFinalChance &&
-                    "border-amber-400 bg-amber-50 text-amber-700 font-semibold"
-                )}
-              >
-                {!currentPuzzle ? (
-                  isLoadingWords
-                    ? "Loading a fresh word—one moment!"
-                    : "We couldn't find a word right now. Try another pack or length."
-                ) : highlightFinalChance ? (
-                  <>Last guess! Your hint is still waiting if you need it.</>
-                ) : (
-                  "Type the word, tap enter, and use the colors to guide you."
-                )}
               </div>
             )}
 
@@ -703,7 +743,6 @@ export default function PlayPage() {
               className="lg:hidden"
               hints={activeHints}
               revealed={revealedHints}
-              hintsLeft={hintsLeft}
               onReveal={revealHint}
               highlight={shouldHighlightHints}
             />
@@ -715,7 +754,6 @@ export default function PlayPage() {
             className="sticky top-6 max-h-[calc(100dvh-3rem)] overflow-auto"
             hints={activeHints}
             revealed={revealedHints}
-            hintsLeft={hintsLeft}
             onReveal={revealHint}
             highlight={shouldHighlightHints}
           />
