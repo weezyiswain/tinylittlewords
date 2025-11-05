@@ -157,7 +157,12 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-dvh px-6 py-10 sm:px-10 grid place-items-center">
+    <main className="relative grid min-h-dvh place-items-center overflow-hidden px-6 py-10 sm:px-10">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-24 left-[-12%] h-64 w-64 rounded-full bg-gradient-to-br from-rose-200/70 via-rose-100/50 to-transparent blur-3xl sm:h-72 sm:w-72" />
+        <div className="absolute -bottom-24 right-[-10%] h-72 w-72 rounded-full bg-gradient-to-br from-sky-200/60 via-sky-100/40 to-transparent blur-3xl sm:h-80 sm:w-80" />
+        <div className="absolute bottom-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-gradient-to-br from-amber-200/45 via-amber-100/30 to-transparent blur-3xl" />
+      </div>
       <Script
         id="home-structured-data"
         type="application/ld+json"
@@ -167,9 +172,9 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="w-full max-w-xl rounded-2xl bg-secondary/60 p-6 shadow-sm backdrop-blur"
+        className="relative w-full max-w-xl space-y-6"
       >
-        <div className="text-center">
+        <div className="rounded-3xl border border-white/60 bg-gradient-to-br from-white/95 via-rose-50/90 to-sky-50/90 p-6 text-center shadow-[0_25px_60px_rgba(255,191,221,0.35)] backdrop-blur-lg">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/70">
             Tiny Little Words
           </p>
@@ -182,7 +187,7 @@ export default function Home() {
           </p>
         </div>
 
-        <section className="mt-8 rounded-xl border border-border bg-background/80 p-5 shadow-inner">
+        <section className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(255,186,213,0.25)] backdrop-blur">
           <div>
             <h2 className="text-lg font-semibold">Word length</h2>
             <p className="text-sm text-muted-foreground">
@@ -197,9 +202,9 @@ export default function Home() {
                 type="button"
                 onClick={() => setSelectedLength(lengthOption)}
                 className={cn(
-                  "flex h-20 flex-col items-center justify-center rounded-xl border border-border bg-white text-center transition hover:border-primary/60 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "flex h-20 flex-col items-center justify-center rounded-2xl border border-transparent bg-white/85 text-center font-semibold text-foreground shadow-[0_12px_28px_rgba(168,213,255,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_16px_36px_rgba(255,170,214,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   lengthOption === selectedLength
-                    ? "border-primary bg-primary/10 text-primary"
+                    ? "bg-gradient-to-br from-[#ff87cf] via-[#f9a9ff] to-[#6bdff9] text-white shadow-[0_18px_42px_rgba(255,135,207,0.45)]"
                     : "text-foreground"
                 )}
               >
@@ -212,7 +217,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-xl border border-border bg-background/80 p-5 shadow-inner">
+        <section className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(187,222,255,0.2)] backdrop-blur">
           <div>
             <h2 className="text-lg font-semibold">Pick a topic (optional)</h2>
             <p className="text-sm text-muted-foreground">
@@ -229,17 +234,12 @@ export default function Home() {
             </label>
             <select
               id="pack-select"
-              className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="mt-2 w-full cursor-not-allowed rounded-lg border border-dashed border-white/70 bg-muted px-3 py-2 text-sm font-medium text-muted-foreground/80 shadow-[0_10px_24px_rgba(174,215,255,0.15)] transition"
               value={selectedPackId}
-              onChange={(event) => setSelectedPackId(event.target.value)}
-              disabled={packsLoading}
+              onChange={() => undefined}
+              disabled
             >
-              <option value="">Surprise me (all words)</option>
-              {packs.map((pack) => (
-                <option key={pack.id} value={pack.id}>
-                  {pack.title}
-                </option>
-              ))}
+              <option value="">Topic selection is a premium feature (coming soon)</option>
             </select>
             {packsLoading && (
               <p className="mt-2 text-xs text-muted-foreground">
@@ -252,10 +252,15 @@ export default function Home() {
                 surprise you instead!
               </p>
             )}
+            {!packsLoading && !packsError && (
+              <div className="mt-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3 text-xs text-primary">
+                Topic packs are part of Tiny Little Words Premium. We’re building the upgrade path now—until then, every game uses the surprise mix.
+              </div>
+            )}
           </div>
         </section>
 
-        <section className="mt-6 rounded-xl border border-border bg-background/80 p-5 shadow-inner">
+        <section className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(255,232,179,0.25)] backdrop-blur">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Adventure buddy</h2>
@@ -267,13 +272,13 @@ export default function Home() {
             <button
               type="button"
               onClick={handleShuffleAvatar}
-              className="inline-flex items-center justify-center rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex items-center justify-center rounded-full border border-transparent bg-gradient-to-r from-rose-300/80 via-fuchsia-300/80 to-sky-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-[0_10px_22px_rgba(255,180,220,0.4)] transition hover:shadow-[0_12px_28px_rgba(116,180,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Shuffle
             </button>
           </div>
 
-          <div className="mt-5 flex items-center gap-4 rounded-xl border border-dashed border-primary/30 bg-white/80 p-4">
+          <div className="mt-5 flex items-center gap-4 rounded-2xl border border-dashed border-primary/40 bg-white/85 p-4 shadow-[0_14px_32px_rgba(255,190,210,0.25)]">
             <div
               className={cn(
                 "flex h-16 w-16 items-center justify-center rounded-full text-3xl",
@@ -301,7 +306,7 @@ export default function Home() {
           type="button"
           onClick={handleStart}
           whileTap={{ scale: 0.98 }}
-          className="mt-8 w-full rounded-full bg-primary px-5 py-4 text-lg font-semibold text-primary-foreground shadow transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="mt-8 w-full rounded-full bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] px-5 py-4 text-lg font-semibold text-white shadow-[0_18px_45px_rgba(255,174,204,0.5)] transition hover:shadow-[0_20px_55px_rgba(255,174,204,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           Start playing
         </motion.button>
