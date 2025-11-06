@@ -26,15 +26,8 @@ export default function Home() {
   const [selectedLength, setSelectedLength] =
     useState<(typeof WORD_LENGTH_OPTIONS)[number]>(4);
   const [avatar, setAvatar] = useState(() => AVATAR_OPTIONS[0]);
-  const [packs, setPacks] = useState<Pack[]>([]);
   const [packsLoading, setPacksLoading] = useState(true);
   const [packsError, setPacksError] = useState<string | null>(null);
-  const [selectedPackId, setSelectedPackId] = useState<string>("");
-
-  const selectedPack =
-    selectedPackId.length > 0
-      ? packs.find((packItem) => packItem.id === selectedPackId) ?? null
-      : null;
 
   useEffect(() => {
     let isCancelled = false;
@@ -67,13 +60,7 @@ export default function Home() {
               Boolean(item?.id) && typeof item?.title === "string"
           ) ?? [];
 
-        setPacks(normalized);
         console.log(`[Supabase] Loaded ${normalized.length} packs.`);
-        if (normalized.length > 0) {
-          const sample =
-            normalized[Math.floor(Math.random() * normalized.length)]!;
-          console.log(`[Supabase] Sample pack: ${sample.title}`);
-        }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Unknown Supabase error.";
@@ -101,7 +88,7 @@ export default function Home() {
   const homeCanonical = useMemo(() => canonicalUrl("/"), []);
 
   const structuredData = useMemo(() => {
-    const packName = selectedPack?.title ?? "All packs";
+    const packName = "All packs";
     return {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -128,13 +115,13 @@ export default function Home() {
         },
         {
           "@type": "ChooseAction",
-          target: `${seoConfig.siteUrl}/play?pack=${selectedPack?.id ?? ""}`,
+          target: `${seoConfig.siteUrl}/play`,
           name: `Choose pack: ${packName}`,
           actionOption: packName,
         },
       ],
     };
-  }, [homeCanonical, selectedLength, selectedPack]);
+  }, [homeCanonical, selectedLength]);
 
   const handleStart = () => {
     const seed = Date.now();
@@ -143,11 +130,6 @@ export default function Home() {
       avatar: avatar.id,
       seed: seed.toString(),
     });
-
-    if (selectedPack) {
-      params.append("pack", selectedPack.id);
-      params.append("packName", selectedPack.title);
-    }
 
     router.push(`/play?${params.toString()}`);
   };
@@ -238,9 +220,9 @@ export default function Home() {
             <select
               id="pack-select"
               className="mt-2 w-full cursor-not-allowed rounded-lg border border-dashed border-white/70 bg-muted px-3 py-2 text-sm font-medium text-muted-foreground/80 shadow-[0_10px_24px_rgba(174,215,255,0.15)] transition"
-              value={selectedPackId}
-              onChange={() => undefined}
+              defaultValue=""
               disabled
+              aria-disabled="true"
             >
               <option value="">Topic selection is a premium feature (coming soon)</option>
             </select>

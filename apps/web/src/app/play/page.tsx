@@ -212,13 +212,6 @@ type SupabaseWordRow = {
   difficulty: string | null;
 };
 
-type PackWordRow = {
-  words: {
-    text: string | null;
-    length?: number | null;
-  } | null;
-};
-
 function evaluateGuess(guess: string, target: string): LetterStatus[] {
   const result: LetterStatus[] = Array(target.length).fill("absent");
   const remainingTargetLetters = target.split("");
@@ -295,6 +288,9 @@ export default function PlayPage() {
       setWordFetchError(null);
 
       try {
+        if (!supabase) {
+          throw new Error("Supabase client unavailable");
+        }
         const lengthFilter = Array.from(SUPPORTED_LENGTHS);
         const { data: wordsData, error } = await supabase
           .from("words")
@@ -320,9 +316,11 @@ export default function PlayPage() {
 
           const allowedTexts = new Set(
             (packWordData ?? [])
-              .map((item: PackWordRow) =>
-                item?.words?.text ? item.words.text.toUpperCase() : null
-              )
+              .map((item) => {
+                const row = item as { words?: { text?: string | null } | null };
+                const word = row?.words?.text ?? null;
+                return typeof word === "string" ? word.toUpperCase() : null;
+              })
               .filter((text): text is string => Boolean(text))
           );
 
