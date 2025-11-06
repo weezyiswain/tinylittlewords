@@ -248,14 +248,14 @@ export default function PlayPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const lengthFromParams = Number(searchParams.get("length"));
+  const lengthFromParams = Number(searchParams?.get("length") ?? NaN);
   const wordLength =
     WORD_LENGTHS.find((option) => option === lengthFromParams) ?? 5;
 
-  const avatarId = searchParams.get("avatar");
-  const packId = searchParams.get("pack");
-  const packName = searchParams.get("packName");
-  const seed = searchParams.get("seed");
+  const avatarId = searchParams?.get("avatar") ?? null;
+  const packId = searchParams?.get("pack") ?? null;
+  const packName = searchParams?.get("packName") ?? null;
+  const seed = searchParams?.get("seed") ?? null;
   const avatar = useMemo(() => chooseAvatar(avatarId), [avatarId]);
 
   const [wordPool, setWordPool] = useState<Puzzle[]>([]);
