@@ -726,7 +726,8 @@ function PlayPageContent() {
         <div className="absolute bottom-[-18%] right-[-10%] h-80 w-80 rounded-full bg-gradient-to-br from-sky-200/60 via-sky-100/45 to-transparent blur-3xl sm:h-96 sm:w-96" />
         <div className="absolute top-1/3 right-1/2 h-72 w-72 translate-x-1/2 rounded-full bg-gradient-to-br from-amber-200/45 via-amber-100/35 to-transparent blur-3xl" />
       </div>
-      <section className="mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-4 sm:px-6 lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
+      <div className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0)+15rem)] lg:pb-12">
+        <section className="mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-4 sm:px-6 lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
         <div className="hidden lg:block" aria-hidden />
 
         <div className="flex w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
@@ -988,13 +989,14 @@ function PlayPageContent() {
           </div>
         </div>
       </div>
-    </section>
+        </section>
+      </div>
 
     <motion.nav
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-      className="mt-auto w-full border-t border-white/60 bg-white/80 px-3 py-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] shadow-[0_-15px_40px_rgba(173,216,255,0.35)] backdrop-blur sm:px-6 lg:px-14 xl:px-20"
+      className="fixed inset-x-0 bottom-0 z-30 w-full border-t border-white/60 bg-white/80 px-3 py-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] shadow-[0_-15px_40px_rgba(173,216,255,0.35)] backdrop-blur sm:px-6 lg:static lg:mt-auto lg:px-14 xl:px-20"
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-2 sm:px-4 lg:px-8">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
