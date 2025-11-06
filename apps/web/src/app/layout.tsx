@@ -43,9 +43,12 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  themeColor: "#fdf7ff",
   manifest: "/manifest.webmanifest",
   category: "Education",
+};
+
+export const viewport = {
+  themeColor: "#fdf7ff",
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -245,6 +245,14 @@ function chooseAvatar(idFromParams: string | null): AvatarOption {
 }
 
 export default function PlayPage() {
+  return (
+    <Suspense fallback={null}>
+      <PlayPageContent />
+    </Suspense>
+  );
+}
+
+function PlayPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
