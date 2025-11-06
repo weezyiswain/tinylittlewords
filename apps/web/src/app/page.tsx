@@ -157,7 +157,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative grid min-h-dvh place-items-center overflow-hidden px-6 py-10 sm:px-10">
+    <main className="relative flex min-h-dvh flex-col items-center overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-24 left-[-12%] h-64 w-64 rounded-full bg-gradient-to-br from-rose-200/70 via-rose-100/50 to-transparent blur-3xl sm:h-72 sm:w-72" />
         <div className="absolute -bottom-24 right-[-10%] h-72 w-72 rounded-full bg-gradient-to-br from-sky-200/60 via-sky-100/40 to-transparent blur-3xl sm:h-80 sm:w-80" />
@@ -195,12 +195,15 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 gap-3">
+          <div className="mt-5 grid grid-cols-3 gap-3" role="radiogroup" aria-label="Select word length">
             {WORD_LENGTH_OPTIONS.map((lengthOption) => (
               <button
                 key={lengthOption}
                 type="button"
                 onClick={() => setSelectedLength(lengthOption)}
+                role="radio"
+                aria-checked={lengthOption === selectedLength}
+                aria-label={`${lengthOption}-letter words (${AGE_SHORT_COPY[lengthOption]})`}
                 className={cn(
                   "flex h-20 flex-col items-center justify-center rounded-2xl border border-transparent bg-white/85 text-center font-semibold text-foreground shadow-[0_12px_28px_rgba(168,213,255,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_16px_36px_rgba(255,170,214,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   lengthOption === selectedLength
@@ -273,6 +276,7 @@ export default function Home() {
               type="button"
               onClick={handleShuffleAvatar}
               className="inline-flex items-center justify-center rounded-full border border-transparent bg-gradient-to-r from-rose-300/80 via-fuchsia-300/80 to-sky-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-[0_10px_22px_rgba(255,180,220,0.4)] transition hover:shadow-[0_12px_28px_rgba(116,180,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="Shuffle adventure buddy"
             >
               Shuffle
             </button>
@@ -306,12 +310,12 @@ export default function Home() {
           type="button"
           onClick={handleStart}
           whileTap={{ scale: 0.98 }}
-          className="mt-8 w-full rounded-full bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] px-5 py-4 text-lg font-semibold text-white shadow-[0_18px_45px_rgba(255,174,204,0.5)] transition hover:shadow-[0_20px_55px_rgba(255,174,204,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="w-full rounded-full bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] px-5 py-4 text-lg font-semibold text-white shadow-[0_18px_45px_rgba(255,174,204,0.5)] transition hover:shadow-[0_20px_55px_rgba(255,174,204,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           Start playing
         </motion.button>
 
-        <p className="mt-3 text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
           No sign in needed. Just cozy word fun!
         </p>
       </motion.div>

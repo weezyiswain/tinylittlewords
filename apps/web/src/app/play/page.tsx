@@ -734,6 +734,8 @@ export default function PlayPage() {
               <div
                 className="flex items-center justify-between gap-3 rounded-3xl border border-white/70 bg-white/85 px-4 py-3 shadow-[0_18px_45px_rgba(173,216,255,0.3)] backdrop-blur"
                 style={{ backfaceVisibility: "hidden" }}
+                aria-live="polite"
+                role="status"
               >
                 <div className="flex items-center gap-3">
                   <Link
@@ -986,7 +988,7 @@ export default function PlayPage() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-      className="mt-auto w-full border-t border-white/60 bg-white/80 px-3 py-3 shadow-[0_-15px_40px_rgba(173,216,255,0.35)] backdrop-blur sm:px-6 lg:px-14 xl:px-20"
+      className="mt-auto w-full border-t border-white/60 bg-white/80 px-3 py-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] shadow-[0_-15px_40px_rgba(173,216,255,0.35)] backdrop-blur sm:px-6 lg:px-14 xl:px-20"
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-2 sm:px-4 lg:px-8">
         {KEYBOARD_ROWS.map((row, rowIndex) => (
@@ -1000,6 +1002,7 @@ export default function PlayPage() {
                   }}
                   className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-xs font-semibold uppercase text-white shadow-[0_14px_32px_rgba(255,174,204,0.45)] transition active:scale-[0.98] sm:h-12 sm:text-sm"
                   disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                  aria-label="Submit guess"
                 >
                   Enter
                 </button>
@@ -1016,6 +1019,7 @@ export default function PlayPage() {
                         onClick={handleBackspace}
                         className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base"
                         disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                        aria-label="Delete letter"
                       >
                         ⌫
                       </button>
@@ -1038,6 +1042,7 @@ export default function PlayPage() {
                         (isGameOver || isCheckingWord) && "opacity-70"
                       )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                      aria-label={`Letter ${key}`}
                     >
                       {key}
                     </button>
@@ -1063,6 +1068,7 @@ export default function PlayPage() {
                       (isGameOver || isCheckingWord) && "opacity-70"
                     )}
                     disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                    aria-label={`Letter ${key}`}
                   >
                     {key}
                   </button>
