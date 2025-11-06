@@ -264,6 +264,10 @@ function PlayPageContent() {
   const packId = searchParams?.get("pack") ?? null;
   const packName = searchParams?.get("packName") ?? null;
   const seed = searchParams?.get("seed") ?? null;
+  const packLabel =
+    typeof packName === "string" && packName.trim().length > 0
+      ? packName
+      : "Surprise mix";
   const avatar = useMemo(() => chooseAvatar(avatarId), [avatarId]);
 
   const [wordPool, setWordPool] = useState<Puzzle[]>([]);
@@ -462,58 +466,63 @@ function PlayPageContent() {
     }, 4000);
     return () => window.clearTimeout(timeout);
   }, [shouldFlipMessage, statusMessage]);
-  const renderHintHelp = (buttonClassName?: string) => (
-    <Sheet>
-      <SheetTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-full border border-transparent bg-gradient-to-br from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-white shadow-[0_12px_26px_rgba(255,174,204,0.45)] transition hover:shadow-[0_14px_32px_rgba(109,211,249,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-            buttonClassName
-          )}
-          aria-label="How to play"
+  const renderHintHelp = (
+    buttonClassName?: string,
+    variant: "default" | "muted" = "default"
+  ) => {
+    const baseClasses =
+      variant === "muted"
+        ? "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+        : "flex h-9 w-9 items-center justify-center rounded-full border border-transparent bg-gradient-to-br from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-white shadow-[0_12px_26px_rgba(255,174,204,0.45)] transition hover:shadow-[0_14px_32px_rgba(109,211,249,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2";
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            className={cn(baseClasses, buttonClassName)}
+            aria-label="How to play"
+          >
+            <HelpCircle className="h-5 w-5" aria-hidden />
+          </button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 shadow-[0_-20px_45px_rgba(173,216,255,0.25)] backdrop-blur"
         >
-          <HelpCircle className="h-5 w-5" aria-hidden />
-        </button>
-      </SheetTrigger>
-      <SheetContent
-        side="bottom"
-        className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 shadow-[0_-20px_45px_rgba(173,216,255,0.25)] backdrop-blur"
-      >
-        <SheetHeader className="pb-2 text-center">
-          <SheetTitle className="text-xl font-bold text-foreground">
-            How to Play
-          </SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground">
-            Guess the secret word in {MAX_GUESSES} tries. Use the colors after each guess to steer your next one!
-          </SheetDescription>
-        </SheetHeader>
-        <div className="space-y-5 overflow-y-auto pb-6">
-          <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
-            <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              <Sparkles className="h-5 w-5 text-primary" aria-hidden />
-              The Goal
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Type a {wordLength}-letter word. Keep trying until every tile shines green!
-            </p>
-          </section>
+          <SheetHeader className="pb-2 text-center">
+            <SheetTitle className="text-xl font-bold text-foreground">
+              How to Play
+            </SheetTitle>
+            <SheetDescription className="text-sm text-muted-foreground">
+              Guess the secret word in {MAX_GUESSES} tries. Use the colors after each guess to steer your next one!
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-5 overflow-y-auto pb-6">
+            <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+                The Goal
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Type a {wordLength}-letter word. Keep trying until every tile shines green!
+              </p>
+            </section>
 
-          <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
-            <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              <Lightbulb className="h-5 w-5 text-amber-500" aria-hidden />
-              Color Detective Guide
-            </h3>
-            <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
-                  😀
-                </span>
-                <span className="font-semibold text-emerald-700">
-                  Green = Perfect spot
-                </span>
-              </li>
-              <li className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+            <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <Lightbulb className="h-5 w-5 text-amber-500" aria-hidden />
+                Color Detective Guide
+              </h3>
+              <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
+                    😀
+                  </span>
+                  <span className="font-semibold text-emerald-700">
+                    Green = Perfect spot
+                  </span>
+                </li>
+                <li className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white">
                   😮
                 </span>
@@ -549,6 +558,7 @@ function PlayPageContent() {
       </SheetContent>
     </Sheet>
   );
+  };
 
   const updateKeyboard = useCallback(
     (guess: string, evaluation: LetterStatus[]) => {
@@ -731,54 +741,46 @@ function PlayPageContent() {
         <div className="hidden lg:block" aria-hidden />
 
         <div className="flex w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
-          <div className="mb-4" style={{ perspective: "1600px" }}>
+          <div
+            className="mb-4 flex items-center gap-3"
+            style={{ perspective: "1600px" }}
+          >
+            <Link
+              href="/"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+              aria-label="Back to puzzles"
+            >
+              <ChevronLeft className="h-5 w-5" aria-hidden />
+            </Link>
             <motion.div
               animate={{ rotateY: isMessageFlipped ? 180 : 0 }}
               transition={{ duration: 0.6, ease: "easeInOut" }}
               style={{ transformStyle: "preserve-3d" }}
-              className="relative h-full"
+              className="relative h-full flex-1"
             >
               <div
-                className="flex items-center justify-between gap-3 rounded-3xl border border-white/70 bg-white/85 px-4 py-3 shadow-[0_18px_45px_rgba(173,216,255,0.3)] backdrop-blur"
+                className="flex items-center gap-3 rounded-3xl border border-white/70 bg-white/85 px-4 py-3 shadow-[0_18px_45px_rgba(173,216,255,0.3)] backdrop-blur"
                 style={{ backfaceVisibility: "hidden" }}
                 aria-live="polite"
                 role="status"
               >
                 <div className="flex items-center gap-3">
-                  <Link
-                    href="/"
-                    className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
-                    aria-label="Back to puzzles"
-                  >
-                    <ChevronLeft className="h-5 w-5" aria-hidden />
-                  </Link>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "flex h-11 w-11 items-center justify-center rounded-full text-2xl shadow-[0_8px_18px_rgba(0,0,0,0.1)] sm:h-12 sm:w-12",
-                        avatar.bg
-                      )}
-                      aria-hidden
-                    >
-                      {avatar.emoji}
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                        Playing with
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {avatar.name}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 self-stretch">
-                  <div className="flex flex-col items-end justify-center text-right">
-                    {packName ? (
-                      <p className="text-xs text-muted-foreground">Pack: {packName}</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">Pack: Surprise mix</p>
+                  <div
+                    className={cn(
+                      "flex h-11 w-11 items-center justify-center rounded-full text-2xl shadow-[0_8px_18px_rgba(0,0,0,0.1)] sm:h-12 sm:w-12",
+                      avatar.bg
                     )}
+                    aria-hidden
+                  >
+                    {avatar.emoji}
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Playing with
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {avatar.name}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -833,6 +835,7 @@ function PlayPageContent() {
                 )}
               </div>
             </motion.div>
+            {renderHintHelp(undefined, "muted")}
           </div>
 
         <motion.section
@@ -964,20 +967,18 @@ function PlayPageContent() {
             )}
           </div>
 
-          <div className="relative lg:hidden">
+          <div className="lg:hidden">
             <HintList
-              className="pr-14"
               hints={activeHints}
               revealed={revealedHints}
               onReveal={revealHint}
               highlight={shouldHighlightHints}
             />
-            {renderHintHelp("absolute right-4 top-4 h-9 w-9")}
           </div>
         </motion.section>
 
         <div className="hidden lg:block">
-          <div className="relative sticky top-6">
+          <div className="sticky top-6">
             <HintList
               className="max-h-[calc(100dvh-3rem)] overflow-auto pr-16"
               hints={activeHints}
@@ -985,108 +986,116 @@ function PlayPageContent() {
               onReveal={revealHint}
               highlight={shouldHighlightHints}
             />
-            {renderHintHelp("absolute right-4 top-4 h-9 w-9")}
           </div>
         </div>
       </div>
         </section>
       </div>
 
-    <motion.nav
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-      className="fixed inset-x-0 bottom-0 z-30 w-full border-t border-white/60 bg-white/80 px-3 py-3 pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] shadow-[0_-15px_40px_rgba(173,216,255,0.35)] backdrop-blur sm:px-6 lg:static lg:mt-auto lg:px-14 xl:px-20"
-    >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-2 sm:px-4 lg:px-8">
-        {KEYBOARD_ROWS.map((row, rowIndex) => (
-          <div key={`kb-row-${rowIndex}`} className="flex justify-center gap-1">
-            {rowIndex === KEYBOARD_ROWS.length - 1 ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void handleSubmit();
-                  }}
-                  className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-xs font-semibold uppercase text-white shadow-[0_14px_32px_rgba(255,174,204,0.45)] transition active:scale-[0.98] sm:h-12 sm:text-sm"
-                  disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                  aria-label="Submit guess"
-                >
-                  Enter
-                </button>
-                {row.map((key, index) => {
-                  const status = keyboardStatus[key];
-                  const isLastLetter = index === row.length - 1;
-                  const isBackspace = isLastLetter;
+    <div className="fixed inset-x-0 bottom-0 z-30 w-full lg:static lg:mt-auto lg:bottom-auto">
+      <div className="mx-auto w-full max-w-none">
+        <div className="flex justify-center">
+          <span className="inline-flex items-center rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[0.675rem] font-semibold uppercase tracking-[0.25em] text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)]">
+            Pack: {packLabel}
+          </span>
+        </div>
+        <motion.nav
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
+          className="mt-2 w-full border-t border-white/60 bg-white pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] shadow-[0_-15px_40px_rgba(173,216,255,0.35)]"
+        >
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-2 pt-3 sm:px-6 lg:px-8">
+            {KEYBOARD_ROWS.map((row, rowIndex) => (
+              <div key={`kb-row-${rowIndex}`} className="flex justify-center gap-1">
+                {rowIndex === KEYBOARD_ROWS.length - 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleSubmit();
+                      }}
+                      className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-xs font-semibold uppercase text-white shadow-[0_14px_32px_rgba(255,174,204,0.45)] transition active:scale-[0.98] sm:h-12 sm:text-sm"
+                      disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                      aria-label="Submit guess"
+                    >
+                      Enter
+                    </button>
+                    {row.map((key, index) => {
+                      const status = keyboardStatus[key];
+                      const isLastLetter = index === row.length - 1;
+                      const isBackspace = isLastLetter;
 
-                  if (isBackspace) {
+                      if (isBackspace) {
+                        return (
+                          <button
+                            key="backspace"
+                            type="button"
+                            onClick={handleBackspace}
+                            className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base"
+                            disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                            aria-label="Delete letter"
+                          >
+                            ⌫
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => handleLetter(key)}
+                          className={cn(
+                            "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                            status === "correct" &&
+                              "border-emerald-500 bg-emerald-500 text-white",
+                            status === "present" &&
+                              "border-amber-400 bg-amber-400 text-white",
+                            status === "absent" &&
+                              "border-slate-300 bg-slate-200 text-slate-600",
+                            (isGameOver || isCheckingWord) && "opacity-70"
+                          )}
+                          disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                          aria-label={`Letter ${key}`}
+                        >
+                          {key}
+                        </button>
+                      );
+                    })}
+                  </>
+                ) : (
+                  row.map((key) => {
+                    const status = keyboardStatus[key];
                     return (
                       <button
-                        key="backspace"
+                        key={key}
                         type="button"
-                        onClick={handleBackspace}
-                        className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base"
+                        onClick={() => handleLetter(key)}
+                        className={cn(
+                          "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                          status === "correct" &&
+                            "border-emerald-500 bg-emerald-500 text-white",
+                          status === "present" &&
+                            "border-amber-400 bg-amber-400 text-white",
+                          status === "absent" &&
+                            "border-slate-300 bg-slate-200 text-slate-600",
+                          (isGameOver || isCheckingWord) && "opacity-70"
+                        )}
                         disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                        aria-label="Delete letter"
+                        aria-label={`Letter ${key}`}
                       >
-                        ⌫
+                        {key}
                       </button>
                     );
-                  }
-
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => handleLetter(key)}
-                      className={cn(
-                        "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
-                        status === "correct" &&
-                          "border-emerald-500 bg-emerald-500 text-white",
-                        status === "present" &&
-                          "border-amber-400 bg-amber-400 text-white",
-                        status === "absent" &&
-                          "border-slate-300 bg-slate-200 text-slate-600",
-                        (isGameOver || isCheckingWord) && "opacity-70"
-                      )}
-                      disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                      aria-label={`Letter ${key}`}
-                    >
-                      {key}
-                    </button>
-                  );
-                })}
-              </>
-            ) : (
-              row.map((key) => {
-                const status = keyboardStatus[key];
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleLetter(key)}
-                    className={cn(
-                      "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
-                      status === "correct" &&
-                        "border-emerald-500 bg-emerald-500 text-white",
-                      status === "present" &&
-                        "border-amber-400 bg-amber-400 text-white",
-                      status === "absent" &&
-                        "border-slate-300 bg-slate-200 text-slate-600",
-                      (isGameOver || isCheckingWord) && "opacity-70"
-                    )}
-                    disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                    aria-label={`Letter ${key}`}
-                  >
-                    {key}
-                  </button>
-                );
-              })
-            )}
+                  })
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+        </motion.nav>
       </div>
-    </motion.nav>
+    </div>
     </main>
   );
 }
