@@ -1021,26 +1021,8 @@ function PlayPageContent() {
                     >
                       Enter
                     </button>
-                    {row.map((key, index) => {
+                    {row.map((key) => {
                       const status = keyboardStatus[key];
-                      const isLastLetter = index === row.length - 1;
-                      const isBackspace = isLastLetter;
-
-                      if (isBackspace) {
-                        return (
-                          <button
-                            key="backspace"
-                            type="button"
-                            onClick={handleBackspace}
-                            className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base"
-                            disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                            aria-label="Delete letter"
-                          >
-                            ⌫
-                          </button>
-                        );
-                      }
-
                       return (
                         <button
                           key={key}
@@ -1063,6 +1045,15 @@ function PlayPageContent() {
                         </button>
                       );
                     })}
+                    <button
+                      type="button"
+                      onClick={handleBackspace}
+                      className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base"
+                      disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                      aria-label="Delete letter"
+                    >
+                      ⌫
+                    </button>
                   </>
                 ) : (
                   row.map((key) => {

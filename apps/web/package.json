@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "predev:3001": "lsof -nP -iTCP:3001 -sTCP:LISTEN | awk 'NR>1 {print $2}' | xargs -r kill -9",
+    "dev:3001": "next dev -p 3001 -H 127.0.0.1",
+    "start:3001": "next start -p 3001 -H 127.0.0.1"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
