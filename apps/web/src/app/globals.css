@@ -126,6 +126,8 @@
       radial-gradient(circle at 20% 85%, rgba(183, 240, 220, 0.45), transparent 55%),
       linear-gradient(130deg, #fff9f1 0%, #f6f6ff 50%, #f3fff7 100%);
     background-attachment: fixed;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: contain;
   }
 }
 

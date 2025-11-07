@@ -1015,7 +1015,7 @@ function PlayPageContent() {
                       onClick={() => {
                         void handleSubmit();
                       }}
-                      className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-xs font-semibold uppercase text-white shadow-[0_14px_32px_rgba(255,174,204,0.45)] transition active:scale-[0.98] sm:h-12 sm:text-sm"
+                      className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-xs font-semibold uppercase text-white shadow-[0_18px_45px_rgba(255,174,204,0.5)] transition hover:shadow-[0_20px_55px_rgba(255,174,204,0.55)] active:scale-[0.98] sm:h-12 sm:text-sm"
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Submit guess"
                     >
