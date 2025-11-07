@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -255,6 +255,8 @@ export default function PlayPage() {
 function PlayPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isHintSheetOpen, setIsHintSheetOpen] = useState(false);
 
   const lengthFromParams = Number(searchParams?.get("length") ?? NaN);
   const wordLength =
@@ -454,6 +456,7 @@ function PlayPageContent() {
   const shouldFlipMessage =
     statusMessage?.tone === "success" || statusMessage?.tone === "encouragement";
   const encouragementAccent = getEncouragementAccent(statusMessage?.speaker);
+  const hintButtonHighlight = shouldHighlightHints && !isHintSheetOpen && hasHintAvailable;
   useEffect(() => {
     if (!shouldFlipMessage || !statusMessage) {
       setIsMessageFlipped(false);
@@ -559,6 +562,46 @@ function PlayPageContent() {
     </Sheet>
   );
   };
+
+  const renderHintAccess = () => (
+    <Sheet open={isHintSheetOpen} onOpenChange={setIsHintSheetOpen}>
+      <SheetTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-4 text-sm font-semibold text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:h-10",
+            hintButtonHighlight &&
+              "border-amber-400 text-amber-700 shadow-[0_16px_28px_rgba(255,196,120,0.3)] animate-bounce"
+          )}
+          aria-label="View hints"
+        >
+          Hint{activeHints.length > 1 ? "s" : ""}
+          {hasHintAvailable ? ` (${hintsLeft})` : ""}
+        </button>
+      </SheetTrigger>
+      <SheetContent
+        side="bottom"
+        className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 shadow-[0_-20px_45px_rgba(173,216,255,0.25)] backdrop-blur"
+      >
+        <SheetHeader className="pb-2 text-center">
+          <SheetTitle className="text-xl font-bold text-foreground">
+            Word Hint{activeHints.length === 1 ? "" : "s"}
+          </SheetTitle>
+          <SheetDescription className="text-sm text-muted-foreground">
+            Reveal hints one at a time whenever you need a nudge.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="space-y-4 overflow-y-auto pb-4">
+          <HintList
+            hints={activeHints}
+            revealed={revealedHints}
+            onReveal={revealHint}
+            highlight={shouldHighlightHints}
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
 
   const updateKeyboard = useCallback(
     (guess: string, evaluation: LetterStatus[]) => {
@@ -729,6 +772,48 @@ function PlayPageContent() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleBackspace, handleLetter, handleSubmit]);
 
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let startY = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      startY = event.touches[0].clientY;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length !== 1) return;
+      if (container.scrollHeight <= container.clientHeight) return;
+
+      const currentY = event.touches[0].clientY;
+      const deltaY = currentY - startY;
+      const atTop = container.scrollTop <= 0;
+      const atBottom =
+        Math.ceil(container.scrollTop + container.clientHeight) >=
+        container.scrollHeight;
+
+      if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+        event.preventDefault();
+      } else {
+        startY = currentY;
+      }
+    };
+
+    container.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
+    container.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+
+    return () => {
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, []);
+
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -736,7 +821,10 @@ function PlayPageContent() {
         <div className="absolute bottom-[-18%] right-[-10%] h-80 w-80 rounded-full bg-gradient-to-br from-sky-200/60 via-sky-100/45 to-transparent blur-3xl sm:h-96 sm:w-96" />
         <div className="absolute top-1/3 right-1/2 h-72 w-72 translate-x-1/2 rounded-full bg-gradient-to-br from-amber-200/45 via-amber-100/35 to-transparent blur-3xl" />
       </div>
-      <div className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0)+15rem)] lg:pb-12">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0)+15rem)] lg:pb-12"
+      >
         <section className="mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-4 sm:px-6 lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
         <div className="hidden lg:block" aria-hidden />
 
@@ -835,6 +923,7 @@ function PlayPageContent() {
                 )}
               </div>
             </motion.div>
+            {renderHintAccess()}
             {renderHintHelp(undefined, "muted")}
           </div>
 
@@ -967,27 +1056,7 @@ function PlayPageContent() {
             )}
           </div>
 
-          <div className="lg:hidden">
-            <HintList
-              hints={activeHints}
-              revealed={revealedHints}
-              onReveal={revealHint}
-              highlight={shouldHighlightHints}
-            />
-          </div>
         </motion.section>
-
-        <div className="hidden lg:block">
-          <div className="sticky top-6">
-            <HintList
-              className="max-h-[calc(100dvh-3rem)] overflow-auto pr-16"
-              hints={activeHints}
-              revealed={revealedHints}
-              onReveal={revealHint}
-              highlight={shouldHighlightHints}
-            />
-          </div>
-        </div>
       </div>
         </section>
       </div>

@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { canonicalUrl, seoConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(seoConfig.siteUrl),
+  applicationName: seoConfig.siteName,
   title: {
     default: seoConfig.defaultTitle,
     template: `%s | ${seoConfig.siteName}`,
@@ -45,10 +46,18 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.webmanifest",
   category: "Education",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: seoConfig.siteName,
+  },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   themeColor: "#fdf7ff",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -57,8 +66,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="en" className="h-full">
+      <body className="h-full font-sans antialiased">
         {children}
       </body>
     </html>

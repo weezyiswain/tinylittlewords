@@ -118,6 +118,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    height: 100%;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: contain;
+  }
   body {
     @apply bg-background text-foreground;
     background-image:
@@ -128,6 +133,7 @@
     background-attachment: fixed;
     overscroll-behavior-y: none;
     overscroll-behavior-x: contain;
+    min-height: 100%;
   }
 }
 

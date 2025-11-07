@@ -2,9 +2,13 @@
   "name": "Tiny Little Words",
   "short_name": "TLWords",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#111827",
+  "orientation": "portrait",
+  "description": "Kid-friendly daily word puzzles with adorable avatar buddies.",
   "icons": [
     {
       "src": "/icons/icon-192.png",
