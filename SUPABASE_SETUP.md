@@ -29,16 +29,19 @@ Optional columns:
 - `difficulty` (VARCHAR) - for future use
 - `created_at` (TIMESTAMP)
 
-## 4. Packs Table (Optional)
+## 4. Packs Table (for word packs dropdown)
 
-If you want word categories, create a `packs` table:
-- `id` (UUID) - primary key
-- `name` (VARCHAR) - pack name like "Animals", "Food"
-- `enabled` (BOOLEAN) - whether pack is active
+The app reads from a `packs` table. It works with **either** column name:
+
+- **Option A:** `id` (UUID), `name` (VARCHAR), `enabled` (BOOLEAN)
+- **Option B:** `id` (UUID), `title` (VARCHAR), `enabled` (BOOLEAN)
 
 And a `pack_words` junction table:
+
 - `pack_id` (UUID) - references packs.id
 - `word_id` (UUID) - references words.id
+
+(Other columns like `description`, `slug`, `created_at` are fine; the app only needs `id`, one of `name`/`title`, and `enabled`.)
 
 ## 5. Test the Connection
 
@@ -50,7 +53,29 @@ npm run dev
 
 The app should now show "Live Supabase words" instead of "Offline backup words" in the game interface.
 
-## 6. Sample Data
+## 6. Live app (production)
+
+For the **deployed app** (e.g. Vercel) to load word packs:
+
+1. **Set environment variables** in your host’s dashboard (e.g. Vercel → Project → Settings → Environment Variables):
+   - `NEXT_PUBLIC_SUPABASE_URL` = your Project URL (from Supabase → Settings → API)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your anon/public key (same place)
+
+2. **Tables used for word packs only** (no auth required):
+   - **`packs`** – at least: `id`, `enabled`, and either `name` or `title`
+   - **`words`** – at least: `id`, `text`, `length`, `enabled` (and `difficulty` optional)
+   - **`pack_words`** – at least: `pack_id`, `word_id` (links packs to words)
+
+3. **Row Level Security (RLS):** Anonymous users must be able to **read** these tables. In Supabase SQL editor, ensure you have policies like:
+   - `packs`: allow `SELECT` where `enabled = true`
+   - `words`: allow `SELECT` where `enabled = true`
+   - `pack_words`: allow `SELECT` (or `SELECT` where true)
+
+   (See `supabase-schema.sql` for full policy examples.)
+
+Other Supabase features (auth, `profiles`, `kid_profiles`, `feedback`) are only used by the Parents and feedback flows; word packs work with just the three tables above and the two env vars.
+
+## 7. Sample Data
 
 If you need sample words, here are some kid-friendly options:
 
