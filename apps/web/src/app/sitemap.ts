@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { canonicalUrl } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ["/", "/play"].map((path) => ({
+  return ["/", "/play", "/parents", "/feedback"].map((path) => ({
     url: canonicalUrl(path),
     lastModified: new Date(),
     changeFrequency: path === "/" ? "daily" : "weekly",

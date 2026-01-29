@@ -59,3 +59,18 @@ If you see "Offline backup words":
 - Check the browser console for any error messages
 
 Your database structure is perfect - the app should work immediately once you add the environment variables!
+
+## Parents area (optional)
+
+The **For parents** page uses `profiles` and `kid_profiles` tables. Run `supabase-parents-schema.sql` in the Supabase SQL editor to create them.
+
+For **Google** or **Facebook** sign-in, enable those providers in Supabase (Authentication → Providers) and add your app’s redirect URL to **Redirect URLs**, e.g.:
+
+- `http://localhost:3001/auth/callback` (local)
+- `https://yourdomain.com/auth/callback` (production)
+
+## In‑app feedback (optional)
+
+The **Give feedback** flow (Parents page only) stores submissions in Supabase. Run `supabase-feedback-schema.sql` in the SQL editor (after `supabase-parents-schema.sql`, since it references `profiles`). View submissions in the **Table Editor** → `feedback`.
+
+If you already have the `feedback` table, run `supabase-feedback-monetization-migration.sql` to add `pricing_preference` and `features_valued` columns.

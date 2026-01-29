@@ -12,9 +12,20 @@ import {
   AvatarOption,
   getRandomAvatar,
 } from "@/lib/avatars";
+import { getBuddyTheme, type BuddyTheme } from "@/lib/buddy-themes";
 import { getFallbackPuzzles, Puzzle } from "@/lib/game-data";
 import { addWordToDictionary, isValidWord } from "@/lib/dictionary";
+import { recordGame } from "@/lib/stats";
 import { supabase } from "@/lib/supabaseClient";
+import { StatsDisplay } from "@/components/stats-display";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -116,19 +127,11 @@ function buildHints(word: string): string[] {
   return hints.slice(0, upper.length >= 5 ? 2 : 1);
 }
 
-function getDayOfYear(date: Date): number {
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff =
-    date.getTime() -
-    start.getTime() +
-    (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60_000;
-  return Math.floor(diff / 86_400_000);
-}
-
 type HintListProps = {
   hints: string[];
   revealed: boolean[];
   onReveal: (index: number) => void;
+  theme: BuddyTheme;
   className?: string;
   highlight?: boolean;
 };
@@ -137,6 +140,7 @@ function HintList({
   hints,
   revealed,
   onReveal,
+  theme,
   className,
   highlight = false,
 }: HintListProps) {
@@ -146,23 +150,23 @@ function HintList({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-white/70 bg-white/85 px-4 py-4 shadow-[0_15px_35px_rgba(173,216,255,0.25)] backdrop-blur transition",
-        highlight &&
-          "border-amber-300 bg-gradient-to-br from-amber-50/95 via-white to-rose-100/90 shadow-[0_0_40px_rgba(251,191,36,0.35)]",
+        "rounded-2xl border border-white/70 bg-white/85 px-4 py-4 backdrop-blur transition",
+        theme.hintSection,
+        highlight && theme.hintSectionHighlight,
         className
       )}
     >
       <h2
         className={cn(
           "text-base font-semibold text-foreground",
-          highlight && "text-amber-700"
+          highlight && theme.hintHeadingHighlight
         )}
       >
         Hints
       </h2>
       <ul className="mt-2 space-y-2 overflow-y-auto pr-1 text-sm text-muted-foreground sm:max-h-40 max-h-28">
         {hints.length === 0 ? (
-          <li className="rounded-lg border border-dashed border-primary/30 bg-gradient-to-r from-primary/10 via-white/90 to-sky-100/60 px-3 py-1.5 text-xs text-muted-foreground">
+          <li className="rounded-lg border border-dashed border-primary/30 bg-gradient-to-r from-primary/10 via-white/90 to-teal-50/60 px-3 py-1.5 text-xs text-muted-foreground">
             No hints just yet—trust your instincts!
           </li>
         ) : (
@@ -188,10 +192,11 @@ function HintList({
                     type="button"
                     onClick={() => onReveal(index)}
                     className={cn(
-                      "inline-flex w-full items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-sky-200/70 via-rose-200/70 to-amber-200/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary shadow-[0_10px_22px_rgba(156,214,255,0.35)] transition hover:shadow-[0_12px_30px_rgba(255,182,193,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      showButtonHighlight && index === firstHiddenIndex
-                        ? "border-amber-400 bg-amber-100 text-amber-700 animate-bounce"
-                        : ""
+                      "inline-flex w-full items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      theme.revealButton,
+                      showButtonHighlight &&
+                        index === firstHiddenIndex &&
+                        cn(theme.revealButtonHighlight, "animate-bounce")
                     )}
                   >
                     Reveal hint
@@ -269,8 +274,9 @@ function PlayPageContent() {
   const packLabel =
     typeof packName === "string" && packName.trim().length > 0
       ? packName
-      : "Surprise mix";
+      : "Surprise me";
   const avatar = useMemo(() => chooseAvatar(avatarId), [avatarId]);
+  const theme = useMemo(() => getBuddyTheme(avatar.id), [avatar.id]);
 
   const [wordPool, setWordPool] = useState<Puzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
@@ -291,6 +297,8 @@ function PlayPageContent() {
   const [showRetryPrompt, setShowRetryPrompt] = useState(false);
   const [isCheckingWord, setIsCheckingWord] = useState(false);
   const [isMessageFlipped, setIsMessageFlipped] = useState(false);
+  const [statsRefresh, setStatsRefresh] = useState(0);
+  const recordedForRoundRef = useRef(false);
 
   const targetWord = currentPuzzle?.word ?? "";
   const activeHints = currentPuzzle?.hints ?? [];
@@ -357,28 +365,12 @@ function PlayPageContent() {
 
           setWordPool(puzzles);
           setWordSource("supabase");
-
-          console.log(
-            `[Supabase] Loaded ${puzzles.length} words for length ${wordLength}${
-              packId ? ` (pack ${packId})` : ""
-            }.`
-          );
-          const sample = puzzles[Math.floor(Math.random() * puzzles.length)]!;
-          console.log(`[Supabase] Sample word: ${sample.word}`);
-          if (puzzles.length > 0) {
-            const todayIndex = getDayOfYear(new Date()) % puzzles.length;
-            const dailyWord = puzzles[todayIndex]!.word;
-            console.log(`[Supabase] Daily word pick: ${dailyWord}`);
-          }
           return;
         }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Unknown Supabase error.";
-        console.error("[Supabase] Failed to load words:", message);
-        if (!isCancelled) {
-          setWordFetchError(message);
-        }
+        if (!isCancelled) setWordFetchError(message);
       }
 
       if (isCancelled) return;
@@ -397,19 +389,6 @@ function PlayPageContent() {
       );
       setWordPool(fallbackPool);
       setWordSource("fallback");
-
-      if (fallbackPool.length === 0) {
-        console.warn(
-          `[Supabase] No fallback words available for length ${wordLength}.`
-        );
-      } else {
-        console.warn(
-          `[Supabase] Using fallback word list (${fallbackPool.length} words) for length ${wordLength}.`
-        );
-        const todayIndex = getDayOfYear(new Date()) % fallbackPool.length;
-        const dailyWord = fallbackPool[todayIndex]!.word;
-        console.warn(`[Supabase] Daily fallback word pick: ${dailyWord}`);
-      }
     };
 
     void loadWords();
@@ -438,6 +417,7 @@ function PlayPageContent() {
     setRevealedHints(Array(activeHints.length).fill(false));
     setHasRetried(false);
     setShowRetryPrompt(false);
+    recordedForRoundRef.current = false;
   }, [currentPuzzle, activeHints.length]);
 
   const isSolved = guesses.includes(targetWord);
@@ -475,11 +455,19 @@ function PlayPageContent() {
   ) => {
     const baseClasses =
       variant === "muted"
-        ? "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
-        : "flex h-9 w-9 items-center justify-center rounded-full border border-transparent bg-gradient-to-br from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-white shadow-[0_12px_26px_rgba(255,174,204,0.45)] transition hover:shadow-[0_14px_32px_rgba(109,211,249,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2";
+        ? cn(
+            "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+            theme.backButton
+          )
+        : cn(
+            "flex h-9 w-9 items-center justify-center rounded-full border border-transparent bg-gradient-to-br text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+            `bg-gradient-to-br ${theme.ctaGradient}`,
+            theme.ctaShadow,
+            theme.ctaShadowHover
+          );
     return (
-      <Sheet>
-        <SheetTrigger asChild>
+      <Dialog>
+        <DialogTrigger asChild>
           <button
             type="button"
             className={cn(baseClasses, buttonClassName)}
@@ -487,23 +475,25 @@ function PlayPageContent() {
           >
             <HelpCircle className="h-5 w-5" aria-hidden />
           </button>
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 shadow-[0_-20px_45px_rgba(173,216,255,0.25)] backdrop-blur"
+        </DialogTrigger>
+        <DialogContent
+          className={cn(
+            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-white/95 px-6 pt-6 pb-4",
+            theme.resultModal
+          )}
         >
-          <SheetHeader className="pb-2 text-center">
-            <SheetTitle className="text-xl font-bold text-foreground">
+          <DialogHeader className="shrink-0 pb-2 pr-8 text-center">
+            <DialogTitle className="text-xl font-bold text-foreground">
               How to Play
-            </SheetTitle>
-            <SheetDescription className="text-sm text-muted-foreground">
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
               Guess the secret word in {MAX_GUESSES} tries. Use the colors after each guess to steer your next one!
-            </SheetDescription>
-          </SheetHeader>
-          <div className="space-y-5 overflow-y-auto pb-6">
+            </DialogDescription>
+          </DialogHeader>
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-2">
             <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
               <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Sparkles className="h-5 w-5 text-primary" aria-hidden />
+                <Sparkles className="h-5 w-5 shrink-0 text-primary" aria-hidden />
                 The Goal
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -513,12 +503,12 @@ function PlayPageContent() {
 
             <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
               <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Lightbulb className="h-5 w-5 text-amber-500" aria-hidden />
+                <Lightbulb className="h-5 w-5 shrink-0 text-amber-500" aria-hidden />
                 Color Detective Guide
               </h3>
               <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
                 <li className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
                     😀
                   </span>
                   <span className="font-semibold text-emerald-700">
@@ -526,41 +516,41 @@ function PlayPageContent() {
                   </span>
                 </li>
                 <li className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white">
-                  😮
-                </span>
-                <span className="font-semibold text-amber-700">
-                  Yellow = Move me
-                </span>
-              </li>
-              <li className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted-foreground/60 text-xs font-bold text-white">
-                  😴
-                </span>
-                <span className="font-semibold text-foreground">
-                  Gray = Not in word
-                </span>
-              </li>
-            </ul>
-          </section>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white">
+                    😮
+                  </span>
+                  <span className="font-semibold text-amber-700">
+                    Yellow = Move me
+                  </span>
+                </li>
+                <li className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted-foreground/60 text-xs font-bold text-white">
+                    😴
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    Gray = Not in word
+                  </span>
+                </li>
+              </ul>
+            </section>
 
-          <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
-            <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              <Star className="h-5 w-5 text-rose-500" aria-hidden />
-              Super Star Tips
-            </h3>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-              <li>
-                Start with different letters like <span className="font-semibold text-foreground">RAIN</span> or <span className="font-semibold text-foreground">BIRD</span>.
-              </li>
-              <li>Look at the hints above the keyboard—they’re friendly clue cards.</li>
-              <li>If you’re stuck, peek at a hint or try swapping the letters around.</li>
-            </ul>
-          </section>
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
+            <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <Star className="h-5 w-5 shrink-0 text-amber-500" aria-hidden />
+                Super Star Tips
+              </h3>
+              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                <li>
+                  Start with different letters like <span className="font-semibold text-foreground">RAIN</span> or <span className="font-semibold text-foreground">BIRD</span>.
+                </li>
+                <li>Look at the hints above the keyboard—they’re friendly clue cards.</li>
+                <li>If you’re stuck, peek at a hint or try swapping the letters around.</li>
+              </ul>
+            </section>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   };
 
   const renderHintAccess = () => (
@@ -569,9 +559,9 @@ function PlayPageContent() {
         <button
           type="button"
           className={cn(
-            "inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-4 text-sm font-semibold text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:h-10",
-            hintButtonHighlight &&
-              "border-amber-400 text-amber-700 shadow-[0_16px_28px_rgba(255,196,120,0.3)] animate-bounce"
+            "inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-4 text-sm font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:h-10",
+            theme.backButton,
+            hintButtonHighlight && cn(theme.hintHighlight, "animate-bounce")
           )}
           aria-label="View hints"
         >
@@ -581,7 +571,10 @@ function PlayPageContent() {
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 shadow-[0_-20px_45px_rgba(173,216,255,0.25)] backdrop-blur"
+        className={cn(
+          "max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 backdrop-blur",
+          theme.sheetShadow
+        )}
       >
         <SheetHeader className="pb-2 text-center">
           <SheetTitle className="text-xl font-bold text-foreground">
@@ -596,6 +589,7 @@ function PlayPageContent() {
             hints={activeHints}
             revealed={revealedHints}
             onReveal={revealHint}
+            theme={theme}
             highlight={shouldHighlightHints}
           />
         </div>
@@ -688,12 +682,22 @@ function PlayPageContent() {
       const nextGuessCount = guesses.length + 1;
 
       if (nextIsSolved) {
+        if (!recordedForRoundRef.current) {
+          recordedForRoundRef.current = true;
+          recordGame(true);
+          setStatsRefresh((n) => n + 1);
+        }
         setStatusMessage({
           text: "You solved it! High fives all around!",
           tone: "success",
         });
         setShowRetryPrompt(false);
       } else if (nextGuessCount >= allowedGuesses) {
+        if (hasRetried && !recordedForRoundRef.current) {
+          recordedForRoundRef.current = true;
+          recordGame(false);
+          setStatsRefresh((n) => n + 1);
+        }
         const baseMessage = `Nice try! The word was ${targetWord}.`;
         const hintReminder =
           !hasRetried && hasHintAvailable
@@ -743,8 +747,13 @@ function PlayPageContent() {
   }, [hasHintAvailable]);
 
   const handleChooseNewPuzzle = useCallback(() => {
+    if (isOutOfTries && !recordedForRoundRef.current) {
+      recordedForRoundRef.current = true;
+      recordGame(false);
+      setStatsRefresh((n) => n + 1);
+    }
     router.push("/");
-  }, [router]);
+  }, [router, isOutOfTries]);
 
   const revealHint = useCallback((index: number) => {
     setRevealedHints((prev) =>
@@ -816,10 +825,29 @@ function PlayPageContent() {
 
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
+      <div
+        aria-hidden
+        className={cn("fixed inset-0 -z-20", theme.pageBackground)}
+      />
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 left-[-15%] h-72 w-72 rounded-full bg-gradient-to-br from-rose-200/65 via-rose-100/50 to-transparent blur-3xl sm:h-80 sm:w-80" />
-        <div className="absolute bottom-[-18%] right-[-10%] h-80 w-80 rounded-full bg-gradient-to-br from-sky-200/60 via-sky-100/45 to-transparent blur-3xl sm:h-96 sm:w-96" />
-        <div className="absolute top-1/3 right-1/2 h-72 w-72 translate-x-1/2 rounded-full bg-gradient-to-br from-amber-200/45 via-amber-100/35 to-transparent blur-3xl" />
+        <div
+          className={cn(
+            "absolute -top-24 left-[-15%] h-72 w-72 rounded-full blur-3xl sm:h-80 sm:w-80",
+            theme.blurLeft
+          )}
+        />
+        <div
+          className={cn(
+            "absolute bottom-[-18%] right-[-10%] h-80 w-80 rounded-full blur-3xl sm:h-96 sm:w-96",
+            theme.blurRight
+          )}
+        />
+        <div
+          className={cn(
+            "absolute top-1/3 right-1/2 h-72 w-72 translate-x-1/2 rounded-full blur-3xl",
+            theme.blurCenter
+          )}
+        />
       </div>
       <div
         ref={scrollContainerRef}
@@ -835,7 +863,10 @@ function PlayPageContent() {
           >
             <Link
               href="/"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+              className={cn(
+                "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+                theme.backButton
+              )}
               aria-label="Back to puzzles"
             >
               <ChevronLeft className="h-5 w-5" aria-hidden />
@@ -847,7 +878,10 @@ function PlayPageContent() {
               className="relative h-full flex-1"
             >
               <div
-                className="flex items-center gap-3 rounded-3xl border border-white/70 bg-white/85 px-4 py-3 shadow-[0_18px_45px_rgba(173,216,255,0.3)] backdrop-blur"
+                className={cn(
+                  "flex items-center gap-3 rounded-3xl border border-white/70 bg-white/85 px-4 py-3 backdrop-blur",
+                  theme.statusCard
+                )}
                 style={{ backfaceVisibility: "hidden" }}
                 aria-live="polite"
                 role="status"
@@ -867,7 +901,7 @@ function PlayPageContent() {
                       Playing with
                     </p>
                     <p className="text-sm font-semibold text-foreground">
-                      {avatar.name}
+                      Your buddy
                     </p>
                   </div>
                 </div>
@@ -875,24 +909,28 @@ function PlayPageContent() {
 
               <div
                 className={cn(
-                  "absolute inset-0 flex flex-col justify-center rounded-3xl border px-4 py-3 shadow-[0_18px_45px_rgba(173,216,255,0.3)] backdrop-blur",
+                  "absolute inset-0 flex flex-col justify-center rounded-3xl border px-4 py-3 backdrop-blur",
                   statusMessage?.tone === "encouragement" && statusMessage?.speaker
-                    ? encouragementAccent.border
+                    ? theme.statusCardFlip
                     : statusMessage?.tone === "success"
-                    ? "border-emerald-300"
-                    : "border-white/70",
-                  statusMessage?.tone === "success" ? "bg-emerald-50" : "bg-white/90"
+                    ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_45px_rgba(16,185,129,0.2)]"
+                    : cn("border-white/70 bg-white/90", theme.statusCard)
                 )}
                 style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
               >
                 {statusMessage?.tone === "encouragement" && statusMessage?.speaker ? (
                   <div className="flex items-center gap-3">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-2xl shadow-[0_10px_24px_rgba(173,216,255,0.4)]">
+                    <span
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-2xl",
+                        theme.keyBase
+                      )}
+                    >
                       {statusMessage.speaker.emoji}
                     </span>
                     <div className="flex flex-col">
                       <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground/70">
-                        {statusMessage.speaker.name} says
+                        Your buddy says
                       </span>
                       <span
                         className={cn(
@@ -933,7 +971,12 @@ function PlayPageContent() {
           transition={{ duration: 0.35, ease: "easeOut" }}
           className="flex flex-1 flex-col gap-4"
         >
-          <div className="space-y-4 rounded-3xl border border-white/70 bg-white/85 p-4 shadow-[0_22px_55px_rgba(173,216,255,0.35)] backdrop-blur">
+          <div
+            className={cn(
+              "space-y-4 rounded-3xl border border-white/70 bg-white/85 p-4 backdrop-blur",
+              theme.resultModal
+            )}
+          >
             <div className="grid gap-2">
               {Array.from({ length: allowedGuesses }).map((_, rowIndex) => {
                 const guess = guesses[rowIndex] ?? "";
@@ -996,7 +1039,7 @@ function PlayPageContent() {
                   </span>
                   <div className="flex flex-col">
                     <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground/70">
-                      {statusMessage.speaker.name} says
+                      Your buddy says
                     </span>
                     <span
                       className={cn(
@@ -1063,16 +1106,25 @@ function PlayPageContent() {
 
     <div className="fixed inset-x-0 bottom-0 z-30 w-full lg:static lg:mt-auto lg:bottom-auto">
       <div className="mx-auto w-full max-w-none">
-        <div className="flex justify-center">
-          <span className="inline-flex items-center rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[0.675rem] font-semibold uppercase tracking-[0.25em] text-muted-foreground shadow-[0_10px_20px_rgba(173,216,255,0.25)]">
+        <div className="flex flex-col items-center justify-center gap-1">
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[0.675rem] font-semibold uppercase tracking-[0.25em] text-muted-foreground",
+              theme.backButton
+            )}
+          >
             Pack: {packLabel}
           </span>
+          <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
         </div>
         <motion.nav
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-          className="mt-2 w-full border-t border-white/60 bg-white pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)] shadow-[0_-15px_40px_rgba(173,216,255,0.35)]"
+          className={cn(
+            "mt-2 w-full border-t border-white/60 bg-white pb-[calc(env(safe-area-inset-bottom,0)+0.75rem)]",
+            theme.bottomBarShadow
+          )}
         >
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-2 pt-3 sm:px-6 lg:px-8">
             {KEYBOARD_ROWS.map((row, rowIndex) => (
@@ -1084,7 +1136,12 @@ function PlayPageContent() {
                       onClick={() => {
                         void handleSubmit();
                       }}
-                      className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent bg-gradient-to-r from-[#ff87cf] via-[#ffb973] to-[#6bdff9] text-xs font-semibold uppercase text-white shadow-[0_18px_45px_rgba(255,174,204,0.5)] transition hover:shadow-[0_20px_55px_rgba(255,174,204,0.55)] active:scale-[0.98] sm:h-12 sm:text-sm"
+                      className={cn(
+                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent text-xs font-semibold uppercase text-white transition active:scale-[0.98] sm:h-12 sm:text-sm",
+                        `bg-gradient-to-r ${theme.ctaGradient}`,
+                        theme.ctaShadow,
+                        theme.ctaShadowHover
+                      )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Submit guess"
                     >
@@ -1098,7 +1155,8 @@ function PlayPageContent() {
                           type="button"
                           onClick={() => handleLetter(key)}
                           className={cn(
-                            "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                            "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                            theme.keyBase,
                             status === "correct" &&
                               "border-emerald-500 bg-emerald-500 text-white",
                             status === "present" &&
@@ -1117,7 +1175,10 @@ function PlayPageContent() {
                     <button
                       type="button"
                       onClick={handleBackspace}
-                      className="flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base"
+                      className={cn(
+                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-base",
+                        theme.keyBase
+                      )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Delete letter"
                     >
@@ -1133,7 +1194,8 @@ function PlayPageContent() {
                         type="button"
                         onClick={() => handleLetter(key)}
                         className={cn(
-                          "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground shadow-[0_10px_22px_rgba(173,216,255,0.35)] transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                          "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                          theme.keyBase,
                           status === "correct" &&
                             "border-emerald-500 bg-emerald-500 text-white",
                           status === "present" &&
