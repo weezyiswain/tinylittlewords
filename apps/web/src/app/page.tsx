@@ -217,19 +217,19 @@ export default function Home() {
         <div className={cn("absolute inset-0", theme.bgBase)} />
         <div
           className={cn(
-            "absolute -top-24 left-[-12%] h-64 w-64 rounded-full blur-3xl sm:h-72 sm:w-72",
+            "absolute -top-24 left-[-12%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-72 sm:w-72 sm:opacity-100",
             theme.blurLeft
           )}
         />
         <div
           className={cn(
-            "absolute -bottom-24 right-[-10%] h-72 w-72 rounded-full blur-3xl sm:h-80 sm:w-80",
+            "absolute -bottom-24 right-[-10%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-80 sm:w-80 sm:opacity-100",
             theme.blurRight
           )}
         />
         <div
           className={cn(
-            "absolute bottom-1/3 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl",
+            "absolute bottom-1/3 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full blur-3xl opacity-60 sm:h-64 sm:w-64 sm:opacity-100",
             theme.blurCenter
           )}
         />
@@ -260,7 +260,7 @@ export default function Home() {
         ) : (
           <>
             <div className="flex-1 min-h-0 overflow-y-auto pb-16 pt-0.5 sm:pb-20">
-              <div className="mx-14 space-y-3 sm:mx-16 sm:space-y-5">
+              <div className="mx-4 space-y-3 sm:mx-8 sm:space-y-5">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
@@ -390,7 +390,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex-shrink-0 mx-14 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-16">
+            <div className="flex-shrink-0 mx-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-8">
               <motion.button
                 type="button"
                 onClick={handleStart}

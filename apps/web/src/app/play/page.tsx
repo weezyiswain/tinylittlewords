@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronLeft, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
+import { Backspace, ChevronLeft, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -829,19 +829,19 @@ function PlayPageContent() {
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(
-            "absolute -top-24 left-[-15%] h-72 w-72 rounded-full blur-3xl sm:h-80 sm:w-80",
+            "absolute -top-24 left-[-15%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-80 sm:w-80 sm:opacity-100",
             theme.blurLeft
           )}
         />
         <div
           className={cn(
-            "absolute bottom-[-18%] right-[-10%] h-80 w-80 rounded-full blur-3xl sm:h-96 sm:w-96",
+            "absolute bottom-[-18%] right-[-10%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-96 sm:w-96 sm:opacity-100",
             theme.blurRight
           )}
         />
         <div
           className={cn(
-            "absolute top-1/3 right-1/2 h-72 w-72 translate-x-1/2 rounded-full blur-3xl",
+            "absolute top-1/3 right-1/2 h-32 w-32 translate-x-1/2 rounded-full blur-3xl opacity-60 sm:h-72 sm:w-72 sm:opacity-100",
             theme.blurCenter
           )}
         />
@@ -850,7 +850,7 @@ function PlayPageContent() {
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0)+15rem)] lg:pb-12"
       >
-        <section className="mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-4 sm:px-6 lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
+        <section className="mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-5 sm:px-6 sm:pt-6 lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
         <div className="hidden lg:block" aria-hidden />
 
         <div className="flex w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
@@ -1173,13 +1173,13 @@ function PlayPageContent() {
                       type="button"
                       onClick={handleBackspace}
                       className={cn(
-                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-base",
+                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-foreground transition active:scale-[0.98] sm:h-12",
                         theme.keyBase
                       )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Delete letter"
                     >
-                      ⌫
+                      <Backspace className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
                     </button>
                   </>
                 ) : (
