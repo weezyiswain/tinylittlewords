@@ -78,12 +78,6 @@ export default function ParentsPage() {
       }
     }
   };
-  const handleDismissInstall = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(INSTALL_DISMISS_KEY, "1");
-      setShowInstallBlock(false);
-    }
-  };
 
   return (
     <main className="min-h-dvh bg-neutral-50 px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
