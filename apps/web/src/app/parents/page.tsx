@@ -31,8 +31,6 @@ function InfoRow({
   );
 }
 
-const INSTALL_DISMISS_KEY = "tlw-parents-install-dismissed";
-
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
   return (
@@ -53,12 +51,7 @@ export default function ParentsPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (isStandalone()) {
-      setShowInstallBlock(false);
-      return;
-    }
-    const dismissed = localStorage.getItem(INSTALL_DISMISS_KEY);
-    setShowInstallBlock(dismissed !== "1");
+    setShowInstallBlock(!isStandalone());
   }, []);
 
   const handleShare = async () => {

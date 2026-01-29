@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Backspace, ChevronLeft, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
+import { ChevronLeft, Delete, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -1179,7 +1179,7 @@ function PlayPageContent() {
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Delete letter"
                     >
-                      <Backspace className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
+                      <Delete className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
                     </button>
                   </>
                 ) : (

@@ -11,7 +11,6 @@ import { getBuddyTheme } from "@/lib/buddy-themes";
 import { supabase } from "@/lib/supabaseClient";
 import { canonicalUrl, seoConfig } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
-import { StatsDisplay } from "@/components/stats-display";
 import { WordPackSelect } from "@/components/word-pack-select";
 import { ChevronRight, Users } from "lucide-react";
 
