@@ -824,7 +824,7 @@ function PlayPageContent() {
   }, []);
 
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden">
+    <main className="relative flex h-dvh min-h-dvh flex-col overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
@@ -848,14 +848,14 @@ function PlayPageContent() {
       </div>
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0)+15rem)] lg:pb-12"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        <section className="mx-auto flex w-full flex-1 flex-col px-4 pb-4 pt-5 sm:px-6 sm:pt-6 lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
+        <section className="mx-auto flex min-h-0 w-full flex-1 flex-col px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+1.25rem)] sm:px-6 sm:pb-4 sm:pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
         <div className="hidden lg:block" aria-hidden />
 
-        <div className="flex w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
+        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
           <div
-            className="mb-4 flex items-center gap-3"
+            className="mb-2 flex shrink-0 items-center gap-2 sm:mb-4 sm:gap-3"
             style={{ perspective: "1600px" }}
           >
             <Link
@@ -966,15 +966,15 @@ function PlayPageContent() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="flex flex-1 flex-col gap-4"
+          className="flex min-h-0 flex-1 flex-col gap-2 sm:gap-4"
         >
           <div
             className={cn(
-              "space-y-4 rounded-3xl border border-white/70 bg-white/85 p-4 backdrop-blur",
+              "flex min-h-0 flex-1 flex-col overflow-hidden space-y-2 rounded-3xl border border-white/70 bg-white/85 p-3 backdrop-blur sm:space-y-4 sm:p-4",
               theme.resultModal
             )}
           >
-            <div className="grid gap-2">
+            <div className="grid min-h-0 flex-1 auto-rows-fr gap-1.5 sm:gap-2">
               {Array.from({ length: allowedGuesses }).map((_, rowIndex) => {
                 const guess = guesses[rowIndex] ?? "";
                 const evaluation = results[rowIndex];
@@ -986,7 +986,7 @@ function PlayPageContent() {
                 return (
                   <div
                     key={`row-${rowIndex}`}
-                    className="grid gap-2"
+                    className="grid gap-1.5 sm:gap-2"
                     style={{
                       gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))`,
                     }}
@@ -999,7 +999,7 @@ function PlayPageContent() {
                         <div
                           key={`row-${rowIndex}-cell-${letterIndex}`}
                           className={cn(
-                            "flex h-12 items-center justify-center rounded-lg border text-lg font-bold uppercase transition sm:h-14 sm:text-xl",
+                            "flex min-h-[2.25rem] items-center justify-center rounded-lg border text-base font-bold uppercase transition sm:text-lg lg:text-xl",
                             status === "correct" &&
                               "border-emerald-500 bg-emerald-500 text-white",
                             status === "present" &&
@@ -1101,7 +1101,7 @@ function PlayPageContent() {
         </section>
       </div>
 
-    <div className="fixed inset-x-0 bottom-0 z-30 w-full lg:static lg:mt-auto lg:bottom-auto">
+    <div className="shrink-0 w-full">
       <div className="mx-auto w-full max-w-none">
         <div className="flex flex-col items-center justify-center gap-1">
           <span
