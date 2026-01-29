@@ -11,6 +11,7 @@ export type BuddyTheme = {
   wordLengthHover: string;
   wordLengthSelected: string;
   buddySelected: string;
+  buddySelectedBorder: string;
   buddyUnselected: string;
   ctaGradient: string;
   ctaShadow: string;
@@ -47,6 +48,7 @@ const bear: BuddyTheme = {
   wordLengthSelected:
     "border-amber-400 bg-amber-500/10 shadow-[0_10px_24px_rgba(251,191,36,0.2)]",
   buddySelected: "border-amber-400 bg-amber-500/10 shadow-[0_10px_24px_rgba(251,191,36,0.2)]",
+  buddySelectedBorder: "border-amber-400",
   buddyUnselected: "border-transparent bg-white/85 hover:border-amber-400/30 hover:bg-amber-500/5",
   ctaGradient: "from-amber-500 via-amber-400 to-orange-400",
   ctaShadow: "shadow-[0_18px_45px_rgba(251,191,36,0.4)]",
@@ -88,6 +90,7 @@ const dog: BuddyTheme = {
   wordLengthSelected:
     "border-blue-400 bg-blue-500/10 shadow-[0_10px_24px_rgba(59,130,246,0.2)]",
   buddySelected: "border-blue-400 bg-blue-500/10 shadow-[0_10px_24px_rgba(59,130,246,0.2)]",
+  buddySelectedBorder: "border-blue-400",
   buddyUnselected: "border-transparent bg-white/85 hover:border-blue-400/30 hover:bg-blue-500/5",
   ctaGradient: "from-blue-500 via-blue-400 to-sky-400",
   ctaShadow: "shadow-[0_18px_45px_rgba(59,130,246,0.4)]",
@@ -129,6 +132,7 @@ const fox: BuddyTheme = {
   wordLengthSelected:
     "border-orange-400 bg-orange-500/10 shadow-[0_10px_24px_rgba(249,115,22,0.2)]",
   buddySelected: "border-orange-400 bg-orange-500/10 shadow-[0_10px_24px_rgba(249,115,22,0.2)]",
+  buddySelectedBorder: "border-orange-400",
   buddyUnselected:
     "border-transparent bg-white/85 hover:border-orange-400/30 hover:bg-orange-500/5",
   ctaGradient: "from-orange-500 via-orange-400 to-amber-400",
@@ -171,6 +175,7 @@ const owl: BuddyTheme = {
   wordLengthSelected:
     "border-purple-400 bg-purple-500/10 shadow-[0_10px_24px_rgba(168,85,247,0.2)]",
   buddySelected: "border-purple-400 bg-purple-500/10 shadow-[0_10px_24px_rgba(168,85,247,0.2)]",
+  buddySelectedBorder: "border-purple-400",
   buddyUnselected:
     "border-transparent bg-white/85 hover:border-purple-400/30 hover:bg-purple-500/5",
   ctaGradient: "from-purple-500 via-purple-400 to-violet-400",
@@ -214,6 +219,7 @@ const panda: BuddyTheme = {
     "border-emerald-400 bg-emerald-500/10 shadow-[0_10px_24px_rgba(16,185,129,0.2)]",
   buddySelected:
     "border-emerald-400 bg-emerald-500/10 shadow-[0_10px_24px_rgba(16,185,129,0.2)]",
+  buddySelectedBorder: "border-emerald-400",
   buddyUnselected:
     "border-transparent bg-white/85 hover:border-emerald-400/30 hover:bg-emerald-500/5",
   ctaGradient: "from-emerald-500 via-emerald-400 to-teal-400",
@@ -256,6 +262,7 @@ const loveyCat: BuddyTheme = {
   wordLengthSelected:
     "border-pink-400 bg-pink-500/10 shadow-[0_10px_24px_rgba(236,72,153,0.2)]",
   buddySelected: "border-pink-400 bg-pink-500/10 shadow-[0_10px_24px_rgba(236,72,153,0.2)]",
+  buddySelectedBorder: "border-pink-400",
   buddyUnselected:
     "border-transparent bg-white/85 hover:border-pink-400/30 hover:bg-pink-500/5",
   ctaGradient: "from-pink-500 via-pink-400 to-rose-400",

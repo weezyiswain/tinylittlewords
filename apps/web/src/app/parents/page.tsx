@@ -1,501 +1,265 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ChevronLeft, LogIn, LogOut, Plus, Sparkles } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
+import { ChevronLeft, Download, Share2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { AVATAR_OPTIONS } from "@/lib/avatars";
-import { supabase } from "@/lib/supabaseClient";
+import { APP_VERSION } from "@/lib/app-version";
+import { canonicalUrl, seoConfig } from "@/lib/seo";
+import { getStats, type Stats } from "@/lib/stats";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-type KidProfile = {
-  id: string;
-  display_name: string;
-  avatar_id: string;
-};
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 border-b border-neutral-100 last:border-b-0">
+      <span className="text-sm font-medium text-neutral-900">{label}</span>
+      <span className="text-sm text-neutral-600 tabular-nums">{value}</span>
+    </div>
+  );
+}
 
-const CALLBACK_URL =
-  typeof window !== "undefined"
-    ? `${window.location.origin}/auth/callback`
-    : "";
+const INSTALL_DISMISS_KEY = "tlw-parents-install-dismissed";
+
+function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
 
 export default function ParentsPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [kids, setKids] = useState<KidProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authBusy, setAuthBusy] = useState(false);
-  const [showAddKid, setShowAddKid] = useState(false);
-  const [newKidName, setNewKidName] = useState("");
-  const [newKidAvatar, setNewKidAvatar] = useState(AVATAR_OPTIONS[0]!.id);
-  const [addKidBusy, setAddKidBusy] = useState(false);
-  const [errorParam, setErrorParam] = useState<string | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [showVersionModal, setShowVersionModal] = useState(false);
+  const [showInstallBlock, setShowInstallBlock] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setStats(getStats());
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const p = new URLSearchParams(window.location.search).get("error");
-    setErrorParam(p);
-  }, []);
-
-  useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
+    if (isStandalone()) {
+      setShowInstallBlock(false);
       return;
     }
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setUser(s?.user ?? null);
-      setLoading(false);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, s) => {
-      setUser(s?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
+    const dismissed = localStorage.getItem(INSTALL_DISMISS_KEY);
+    setShowInstallBlock(dismissed !== "1");
   }, []);
 
-  useEffect(() => {
-    if (!user || !supabase) return;
-    const client = supabase;
-    const fetchKids = async () => {
-      const { data } = await client
-        .from("kid_profiles")
-        .select("id,display_name,avatar_id")
-        .eq("parent_id", user.id)
-        .order("created_at", { ascending: true });
-      setKids((data ?? []) as KidProfile[]);
-    };
-    void fetchKids();
-  }, [user]);
-
-  useEffect(() => {
-    if (!user || !supabase) return;
-    const client = supabase;
-    const ensureProfile = async () => {
-      const { data: existing } = await client
-        .from("profiles")
-        .select("id")
-        .eq("id", user.id)
-        .single();
-      if (!existing) {
-        await client.from("profiles").insert({
-          id: user.id,
-          email: user.email ?? undefined,
-        });
-      }
-    };
-    void ensureProfile();
-  }, [user]);
-
-  const handleEmailAuth = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setAuthError(null);
-      setAuthBusy(true);
-      if (!supabase) {
-        setAuthError("Auth not available.");
-        setAuthBusy(false);
-        return;
-      }
+  const handleShare = async () => {
+    const url = canonicalUrl("/");
+    const title = seoConfig.siteName;
+    const text = "A word puzzle game for brave readers ages 6–10. No sign-in—just open and play.";
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        if (authMode === "signup") {
-          const { error } = await supabase.auth.signUp({ email, password });
-          if (error) throw error;
-          setAuthError(null);
-          setAuthMode("signin");
-          setPassword("");
-          // Optional: show "Check your email" message. For testing, some configs auto-confirm.
-        } else {
-          const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-          if (error) throw error;
-          setAuthError(null);
+        await navigator.share({ title, text, url });
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          try {
+            await navigator.clipboard?.writeText(url);
+          } catch {
+            window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`, "_blank");
+          }
         }
-      } catch (err) {
-        setAuthError(
-          err instanceof Error ? err.message : "Something went wrong."
-        );
-      } finally {
-        setAuthBusy(false);
       }
-    },
-    [authMode, email, password]
-  );
-
-  const handleOAuth = useCallback(
-    (provider: "google" | "facebook") => {
-      if (!supabase) return;
-      supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: `${CALLBACK_URL}?next=/parents` },
-      });
-    },
-    []
-  );
-
-  const handleSignOut = useCallback(async () => {
-    if (supabase) await supabase.auth.signOut();
-    setKids([]);
-  }, []);
-
-  const handleAddKid = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!user || !supabase || !newKidName.trim()) return;
-      setAddKidBusy(true);
-      setAuthError(null);
+    } else {
       try {
-        const { data, error } = await supabase
-          .from("kid_profiles")
-          .insert({
-            parent_id: user.id,
-            display_name: newKidName.trim(),
-            avatar_id: newKidAvatar,
-          })
-          .select("id,display_name,avatar_id")
-          .single();
-        if (error) throw error;
-        setKids((prev) => [...prev, data as KidProfile]);
-        setNewKidName("");
-        setNewKidAvatar(AVATAR_OPTIONS[0]!.id);
-        setShowAddKid(false);
-      } catch (err) {
-        setAuthError(
-          err instanceof Error ? err.message : "Could not add kid profile."
-        );
-      } finally {
-        setAddKidBusy(false);
+        await navigator.clipboard?.writeText(url);
+      } catch {
+        window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`, "_blank");
       }
-    },
-    [user, newKidName, newKidAvatar]
-  );
-
-  if (loading) {
-    return (
-      <main className="flex min-h-dvh flex-col items-center justify-center px-4">
-        <p className="text-muted-foreground">Loading…</p>
-      </main>
-    );
-  }
+    }
+  };
+  const handleDismissInstall = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(INSTALL_DISMISS_KEY, "1");
+      setShowInstallBlock(false);
+    }
+  };
 
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 left-[-12%] h-64 w-64 rounded-full bg-gradient-to-br from-teal-200/60 via-teal-100/40 to-transparent blur-3xl" />
-        <div className="absolute -bottom-24 right-[-10%] h-72 w-72 rounded-full bg-gradient-to-br from-amber-200/55 via-amber-100/35 to-transparent blur-3xl" />
-      </div>
-
-      <div className="mx-auto w-full max-w-xl space-y-6">
-        <div className="flex items-center gap-3">
+    <main className="min-h-dvh bg-neutral-50 px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
+      <div className="mx-auto max-w-xl space-y-6">
+        <div className="flex items-center">
           <Link
             href="/"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground shadow-[0_10px_20px_rgba(20,184,166,0.15)] transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
+            className="inline-flex min-w-[4rem] shrink-0 items-center gap-1 text-sm text-slate-500 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
             aria-label="Back to home"
           >
-            <ChevronLeft className="h-5 w-5" aria-hidden />
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+            Back
           </Link>
-          <h1 className="text-xl font-bold text-foreground">For parents</h1>
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <h1 className="text-xl font-bold text-neutral-900">For parents</h1>
+            <p className="mt-1 text-sm text-neutral-500/80">
+              Tiny Little Words is in test mode.
+            </p>
+          </div>
+          <div className="min-w-[4rem] shrink-0" aria-hidden />
         </div>
 
-        {errorParam === "auth" && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Sign-in was cancelled or something went wrong. Try again below.
-          </div>
-        )}
+        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900">About Tiny Little Words</h2>
+          <p className="mt-2 text-sm text-neutral-600">
+            Tiny Little Words is a word puzzle game built for brave readers ages 6–10. Kids pick a word length, choose a friendly buddy to cheer them on, and play through short, focused rounds. No sign-in required—just open and play.
+          </p>
+          <p className="mt-3 text-sm text-neutral-600">
+            We&apos;re in an early phase and improving the app with feedback from families. Our goal is to make word practice feel fun and low-pressure.
+          </p>
+        </section>
 
-        {!user ? (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900">Share with other parents</h2>
+          <p className="mt-1 text-sm text-neutral-600">
+            We&apos;re trying to learn as much as we can right now. If you know another parent who might want to try Tiny Little Words, feel free to share it with them.
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => void handleShare()}
+            className="mt-4 border border-neutral-300 bg-white text-neutral-700 shadow-sm hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-neutral-500"
           >
-            <div className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(20,184,166,0.15)] backdrop-blur">
-              <h2 className="text-lg font-semibold">Sign in or create an account</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Optional. Use the app without signing in anytime.
-              </p>
+            <Share2 className="h-4 w-4" aria-hidden />
+            Share this app
+          </Button>
+        </section>
 
-              <form onSubmit={handleEmailAuth} className="mt-5 space-y-4">
-                <div>
-                  <label
-                    htmlFor="parents-email"
-                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                  >
-                    Email
-                  </label>
-                  <Input
-                    id="parents-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="mt-2"
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="parents-password"
-                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                  >
-                    Password
-                  </label>
-                  <Input
-                    id="parents-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="mt-2"
-                    required={authMode === "signin"}
-                    autoComplete={authMode === "signup" ? "new-password" : "current-password"}
-                  />
-                </div>
-                {authError && (
-                  <p className="text-sm text-amber-700">{authError}</p>
-                )}
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="submit"
-                    disabled={authBusy}
-                    className="bg-gradient-to-r from-teal-500 via-teal-400 to-amber-400 text-white hover:opacity-90"
-                  >
-                    {authMode === "signin" ? "Sign in" : "Create account"}
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMode((m) => (m === "signin" ? "signup" : "signin"));
-                      setAuthError(null);
-                    }}
-                    className="text-sm font-medium text-primary underline underline-offset-2"
-                  >
-                    {authMode === "signin"
-                      ? "Create an account instead"
-                      : "Sign in instead"}
-                  </button>
-                </div>
-              </form>
-
-              <div className="mt-6 border-t border-white/60 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Or continue with
-                </p>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleOAuth("google")}
-                    className="gap-2"
-                  >
-                    <LogIn className="h-4 w-4" aria-hidden />
-                    Google
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleOAuth("facebook")}
-                    className="gap-2"
-                  >
-                    <LogIn className="h-4 w-4" aria-hidden />
-                    Facebook
-                  </Button>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Google and Facebook sign-in require configuration in your
-                  Supabase project. Email sign-in works out of the box.
-                </p>
+        <Dialog open={showInstallModal} onOpenChange={setShowInstallModal}>
+          <DialogContent className="max-h-[85dvh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add to your phone</DialogTitle>
+              <DialogDescription>
+                You can pin Tiny Little Words to your home screen so it opens like a regular app—no app store needed.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-800">On iPhone or iPad (Safari)</h3>
+                <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-neutral-600">
+                  <li>Open this site in Safari (not in another browser).</li>
+                  <li>Tap the Share button at the bottom (square with an arrow).</li>
+                  <li>Scroll and tap &quot;Add to Home Screen.&quot;</li>
+                  <li>Tap &quot;Add&quot; in the top right.</li>
+                </ol>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-800">On Android (Chrome)</h3>
+                <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-neutral-600">
+                  <li>Open this site in Chrome.</li>
+                  <li>Tap the menu (three dots) in the top right.</li>
+                  <li>Tap &quot;Add to Home screen&quot; or &quot;Install app.&quot;</li>
+                  <li>Confirm with &quot;Add&quot; or &quot;Install.&quot;</li>
+                </ol>
               </div>
             </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <div className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(20,184,166,0.15)] backdrop-blur">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold">Kid profiles</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Add profiles for your kids. No passwords—just a name and a buddy.
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showVersionModal} onOpenChange={setShowVersionModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Getting the latest version</DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-3 text-left text-sm text-neutral-600">
+                  <p>
+                    To see the latest version, close the app completely and reopen it from your home screen.
+                  </p>
+                  <p>
+                    In the future we&apos;ll automatically update for major changes, but we don&apos;t have that yet while we&apos;re testing.
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  onClick={() => setShowAddKid((v) => !v)}
-                  className="shrink-0 gap-2"
-                >
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Add kid
-                </Button>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+
+        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900">Feedback</h2>
+          <p className="mt-1 text-sm text-neutral-600">
+            We&apos;d love to hear from you—your feedback shapes what we build next.
+          </p>
+          <Link href="/feedback?from=parents" className="mt-4 inline-block">
+            <Button
+              type="button"
+              className="bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500"
+            >
+              Give feedback
+            </Button>
+          </Link>
+        </section>
+
+        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900">App info</h2>
+          <div className="mt-3">
+            <InfoRow
+              label="Version"
+              value={
+                <span className="flex items-center justify-end gap-2">
+                  <span>{APP_VERSION}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowVersionModal(true)}
+                    className="h-7 shrink-0 rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800 focus-visible:ring-neutral-500"
+                  >
+                    Is this the latest version?
+                  </Button>
+                </span>
+              }
+            />
+            <InfoRow label="Games played" value={stats?.totalGames ?? 0} />
+            <InfoRow
+              label="Data storage"
+              value={
+                <>
+                  This device only{" "}
+                  <span className="inline-flex items-center rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-500">
+                    local
+                  </span>
+                </>
+              }
+            />
+          </div>
+          {showInstallBlock === true && (
+            <div className="mt-4 flex flex-col gap-3 border-t border-neutral-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Download className="h-5 w-5" aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Install as app</p>
+                  <p className="text-xs text-muted-foreground">
+                    Add to your home screen for quick access.
+                  </p>
+                </div>
               </div>
-
-              {showAddKid && (
-                <form
-                  onSubmit={handleAddKid}
-                  className="mt-5 space-y-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-4"
-                >
-                  <div>
-                    <label
-                      htmlFor="new-kid-name"
-                      className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                    >
-                      Display name
-                    </label>
-                    <Input
-                      id="new-kid-name"
-                      value={newKidName}
-                      onChange={(e) => setNewKidName(e.target.value)}
-                      placeholder="e.g. Sam"
-                      className="mt-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Buddy
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {AVATAR_OPTIONS.map((a) => (
-                        <button
-                          key={a.id}
-                          type="button"
-                          onClick={() => setNewKidAvatar(a.id)}
-                          className={cn(
-                            "flex h-10 w-10 items-center justify-center rounded-full text-lg transition",
-                            a.bg,
-                            newKidAvatar === a.id
-                              ? "ring-2 ring-primary ring-offset-2"
-                              : "opacity-70 hover:opacity-100"
-                          )}
-                          aria-label={a.name}
-                          title={a.name}
-                        >
-                          {a.emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {authError && (
-                    <p className="text-sm text-amber-700">{authError}</p>
-                  )}
-                  <div className="flex gap-3">
-                    <Button
-                      type="submit"
-                      disabled={addKidBusy || !newKidName.trim()}
-                      className="bg-primary text-primary-foreground"
-                    >
-                      {addKidBusy ? "Adding…" : "Add"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowAddKid(false);
-                        setNewKidName("");
-                        setAuthError(null);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              )}
-
-              <ul className="mt-5 space-y-3">
-                {kids.length === 0 && !showAddKid && (
-                  <li className="rounded-xl border border-dashed border-primary/30 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
-                    No kid profiles yet. Tap &quot;Add kid&quot; to create one.
-                  </li>
-                )}
-                {kids.map((k) => {
-                  const av = AVATAR_OPTIONS.find((a) => a.id === k.avatar_id) ?? AVATAR_OPTIONS[0]!;
-                  return (
-                    <li
-                      key={k.id}
-                      className="flex items-center gap-3 rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-sm"
-                    >
-                      <div
-                        className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-full text-xl",
-                          av.bg
-                        )}
-                      >
-                        {av.emoji}
-                      </div>
-                      <span className="font-medium text-foreground">
-                        {k.display_name}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(20,184,166,0.12)] backdrop-blur">
-              <h2 className="flex items-center gap-2 text-lg font-semibold">
-                <Sparkles className="h-5 w-5 text-primary" aria-hidden />
-                Subscription
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Coming later. No payments or upgrades during this test—everything
-                is free to use.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(255,232,179,0.25)] backdrop-blur">
-              <div>
-                <h2 className="text-lg font-semibold">Feedback</h2>
-                <p className="text-sm text-muted-foreground">
-                  We&apos;d love to hear from you—your feedback shapes what we build next.
-                </p>
-              </div>
-              <Link href="/feedback?from=parents" className="shrink-0">
-                <Button type="button" variant="outline" className="gap-2">
-                  Give feedback
-                </Button>
-              </Link>
-            </div>
-
-            <div className="flex justify-end">
               <Button
                 type="button"
-                variant="outline"
-                onClick={handleSignOut}
-                className="gap-2 text-muted-foreground"
+                variant="secondary"
+                onClick={() => setShowInstallModal(true)}
+                className="shrink-0 border border-blue-600 bg-white text-blue-600 shadow-sm hover:bg-blue-50 hover:text-blue-700 hover:border-blue-700 focus-visible:ring-blue-500"
               >
-                <LogOut className="h-4 w-4" aria-hidden />
-                Sign out
+                Show me how
               </Button>
             </div>
-          </motion.div>
-        )}
-
-        {!user && (
-            <div className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-[0_18px_45px_rgba(251,191,36,0.15)] backdrop-blur">
-            <h2 className="text-lg font-semibold">Feedback</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              We&apos;d love to hear from you—your feedback shapes what we build next.
-            </p>
-            <Link href="/feedback?from=parents" className="mt-4 inline-block">
-              <Button type="button" variant="outline">
-                Give feedback
-              </Button>
-            </Link>
-          </div>
-        )}
+          )}
+        </section>
       </div>
     </main>
   );

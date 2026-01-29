@@ -10,9 +10,10 @@ import { AVATAR_OPTIONS, getRandomAvatar } from "@/lib/avatars";
 import { getBuddyTheme } from "@/lib/buddy-themes";
 import { supabase } from "@/lib/supabaseClient";
 import { canonicalUrl, seoConfig } from "@/lib/seo";
-import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
+import { Button } from "@/components/ui/button";
 import { StatsDisplay } from "@/components/stats-display";
 import { WordPackSelect } from "@/components/word-pack-select";
+import { ChevronRight, Users } from "lucide-react";
 
 const WORD_LENGTH_OPTIONS = [3, 4, 5] as const;
 const AGE_SHORT_COPY: Record<(typeof WORD_LENGTH_OPTIONS)[number], string> = {
@@ -36,9 +37,20 @@ export default function Home() {
   const [packs, setPacks] = useState<Pack[]>([]);
   const [selectedPackId, setSelectedPackId] = useState<string | null>(null);
   const [minLoadElapsed, setMinLoadElapsed] = useState(false);
+  const [skipInitialLoader] = useState(
+    () => typeof window !== "undefined" && sessionStorage.getItem("tlw-initial-load-done") === "1"
+  );
 
   useEffect(() => {
-    const t = setTimeout(() => setMinLoadElapsed(true), 1200);
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("tlw-initial-load-done") === "1") {
+      setMinLoadElapsed(true);
+      return;
+    }
+    const t = setTimeout(() => {
+      sessionStorage.setItem("tlw-initial-load-done", "1");
+      setMinLoadElapsed(true);
+    }, 2800);
     return () => clearTimeout(t);
   }, []);
 
@@ -127,7 +139,7 @@ export default function Home() {
     };
   }, []);
 
-  const showLoading = packsLoading || !minLoadElapsed;
+  const showLoading = (packsLoading || !minLoadElapsed) && !skipInitialLoader;
   const theme = useMemo(() => getBuddyTheme(avatar.id), [avatar.id]);
 
   const homeCanonical = useMemo(() => canonicalUrl("/"), []);
@@ -191,9 +203,18 @@ export default function Home() {
   };
 
   return (
-    <main className="relative flex h-dvh min-h-dvh flex-col items-center overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
+    <>
+      <div
+        className="pointer-events-none fixed -z-10"
+        style={{
+          left: "-15vmin",
+          top: "-15vmin",
+          width: "calc(100vw + 30vmin)",
+          height: "calc(100vh + 30vmin)",
+        }}
+        aria-hidden
+      >
+        <div className={cn("absolute inset-0", theme.bgBase)} />
         <div
           className={cn(
             "absolute -top-24 left-[-12%] h-64 w-64 rounded-full blur-3xl sm:h-72 sm:w-72",
@@ -213,6 +234,7 @@ export default function Home() {
           )}
         />
       </div>
+      <main className="relative flex h-dvh min-h-dvh flex-col items-center overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
       <Script
         id="home-structured-data"
         type="application/ld+json"
@@ -225,42 +247,48 @@ export default function Home() {
         className="relative flex min-h-0 flex-1 flex-col w-full max-w-xl"
       >
         {showLoading ? (
-          <div
-            className={cn(
-              "rounded-2xl border border-white/60 bg-gradient-to-br px-6 py-8 text-center backdrop-blur-lg sm:rounded-3xl sm:py-10",
-              theme.loadingCard
-            )}
-          >
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/70">
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
               Tiny Little Words
             </p>
-            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
-              Built for brave readers ages 6–10. Choose your word size and a
-              friendly avatar will cheer you on each game.
-            </p>
-            <p className="mt-6 text-sm text-muted-foreground/80">
-              Loading…
-            </p>
+            <div className="flex items-center gap-1.5" aria-hidden>
+              <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s] [animation-delay:0.15s]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s] [animation-delay:0.3s]" />
+            </div>
           </div>
         ) : (
           <>
-            <div className="flex-1 min-h-0 overflow-y-auto space-y-3 sm:space-y-5">
-              <div className="text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/70">
+            <div className="flex-1 min-h-0 overflow-y-auto pb-16 pt-0.5 sm:pb-20">
+              <div className="mx-14 space-y-3 sm:mx-16 sm:space-y-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
                 </p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  asChild
+                  className="shrink-0 border-neutral-300 bg-white/90 text-neutral-600 shadow-sm transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-neutral-500"
+                >
+                  <Link href="/parents" className="gap-1.5">
+                    <Users className="size-4" aria-hidden />
+                    For parents
+                    <ChevronRight className="size-4" aria-hidden />
+                  </Link>
+                </Button>
               </div>
 
               <section
                 className={cn(
-                  "rounded-2xl border border-white/70 bg-white/80 p-5 backdrop-blur",
+                  "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-5",
                   theme.cardShadow
                 )}
               >
                 <div>
                   <h2 className="text-lg font-semibold">Word length</h2>
                   <p className="text-sm text-muted-foreground">
-                    Pick the word size that feels fun today—short and speedy or big and bold.
+                    Pick how many letters are in today&apos;s word
                   </p>
                 </div>
 
@@ -274,10 +302,10 @@ export default function Home() {
                       aria-checked={lengthOption === selectedLength}
                       aria-label={`${lengthOption}-letter words (${AGE_SHORT_COPY[lengthOption]})`}
                       className={cn(
-                        "flex h-20 flex-col items-center justify-center rounded-2xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                        "flex h-20 flex-col items-center justify-center rounded-2xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                         theme.wordLengthBase,
                         theme.wordLengthHover,
-                        "hover:border-primary/40",
+                        "hover:border-neutral-400",
                         lengthOption === selectedLength
                           ? theme.wordLengthSelected
                           : "text-foreground"
@@ -301,48 +329,48 @@ export default function Home() {
                 <div>
                   <h2 className="text-lg font-semibold">Adventure buddy</h2>
                   <p className="text-sm text-muted-foreground">
-                    Pick a pal to cheer you on.
+                    Pick a pal to cheer you on
                   </p>
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6" role="radiogroup" aria-label="Pick adventure buddy">
-                  {AVATAR_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={avatar.id === opt.id}
-                      aria-label={`${opt.emoji} buddy`}
-                      onClick={() => setAvatar(opt)}
-                      className={cn(
-                        "flex flex-col items-center justify-center rounded-2xl border-2 p-3 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                        avatar.id === opt.id ? theme.buddySelected : theme.buddyUnselected
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "flex h-12 w-12 items-center justify-center rounded-full text-2xl sm:h-14 sm:w-14 sm:text-3xl",
-                          opt.bg
-                        )}
-                        aria-hidden
-                      >
-                        {opt.emoji}
+                <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-2.5" role="radiogroup" aria-label="Pick adventure buddy">
+                  {AVATAR_OPTIONS.map((opt) => {
+                    const isSelected = avatar.id === opt.id;
+                    return (
+                      <div key={opt.id} className="aspect-square w-full min-w-0">
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          aria-label={`${opt.emoji} buddy`}
+                          onClick={() => setAvatar(opt)}
+                          className={cn(
+                            "flex h-full w-full flex-col items-center justify-center rounded-2xl border p-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                            isSelected
+                              ? cn(opt.bgSelected, theme.buddySelectedBorder, "shadow-[0_8px_20px_rgba(0,0,0,0.08)]")
+                              : cn(opt.bg, "border-transparent hover:border-primary/40")
+                          )}
+                        >
+                          <span className="text-2xl sm:text-3xl" aria-hidden>
+                            {opt.emoji}
+                          </span>
+                        </button>
                       </div>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
 
               <section
                 className={cn(
-                  "rounded-2xl border border-white/70 bg-white/80 p-5 backdrop-blur",
+                  "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-5",
                   theme.cardShadow
                 )}
               >
                 <div>
                   <h2 className="text-lg font-semibold">Word pack</h2>
                   <p className="text-sm text-muted-foreground">
-                    Choose a themed pack or Surprise me.
+                    Choose a theme to explore, or let us surprise you
                   </p>
                 </div>
 
@@ -359,30 +387,10 @@ export default function Home() {
                 </div>
               </section>
 
-              <p className="text-center text-sm text-muted-foreground">
-                Tiny Little Words is in test mode. We&apos;re improving things with your
-                help — more updates coming soon.
-              </p>
-
-              <StatsDisplay variant="block" />
-
-              <PwaInstallPrompt />
-
-              <p className="text-center text-xs text-muted-foreground">
-                No sign in needed. Just cozy word fun!
-              </p>
-
-              <footer className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-2 pb-4 text-xs text-muted-foreground">
-                <Link
-                  href="/parents"
-                  className="underline decoration-primary/40 underline-offset-2 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded"
-                >
-                  For parents
-                </Link>
-              </footer>
+              </div>
             </div>
 
-            <div className="flex-shrink-0 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="flex-shrink-0 mx-14 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-16">
               <motion.button
                 type="button"
                 onClick={handleStart}
@@ -400,6 +408,7 @@ export default function Home() {
           </>
         )}
       </motion.div>
-    </main>
+      </main>
+    </>
   );
 }

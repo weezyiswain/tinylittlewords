@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { APP_VERSION } from "@/lib/app-version";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,6 +97,7 @@ export default function FeedbackPage() {
           features_valued: featuresValued.length > 0 ? featuresValued : null,
           source: source || "app",
           parent_id: parentId || null,
+          app_version: APP_VERSION,
         });
         if (err) throw err;
         setSubmitted(true);
