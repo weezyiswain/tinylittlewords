@@ -825,11 +825,8 @@ function PlayPageContent() {
 
   return (
     <main className="relative flex min-h-dvh flex-col overflow-hidden">
-      <div
-        aria-hidden
-        className={cn("fixed inset-0 -z-20", theme.pageBackground)}
-      />
       <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(
             "absolute -top-24 left-[-15%] h-72 w-72 rounded-full blur-3xl sm:h-80 sm:w-80",

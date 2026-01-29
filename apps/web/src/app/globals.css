@@ -126,10 +126,7 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at 15% 15%, rgba(167, 243, 208, 0.4), transparent 55%),
-      radial-gradient(circle at 85% 10%, rgba(253, 230, 138, 0.45), transparent 50%),
-      radial-gradient(circle at 20% 85%, rgba(165, 243, 252, 0.35), transparent 55%),
-      linear-gradient(130deg, #f8fdf9 0%, #f0fdfa 45%, #fffbeb 100%);
+      linear-gradient(130deg, #f8fafc 0%, #f1f5f9 45%, #f8fafc 100%);
     background-attachment: fixed;
     overscroll-behavior-y: none;
     overscroll-behavior-x: contain;

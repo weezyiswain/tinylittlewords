@@ -155,11 +155,8 @@ export default function Home() {
 
   return (
     <main className="relative flex min-h-dvh flex-col items-center overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
-      <div
-        aria-hidden
-        className={cn("fixed inset-0 -z-20", theme.pageBackground)}
-      />
       <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(
             "absolute -top-24 left-[-12%] h-64 w-64 rounded-full blur-3xl sm:h-72 sm:w-72",

@@ -1,5 +1,6 @@
 export type BuddyTheme = {
-  pageBackground: string;
+  /** Subtle full-bleed base gradient; use with absolute inset-0. */
+  bgBase: string;
   blurLeft: string;
   blurRight: string;
   blurCenter: string;
@@ -32,8 +33,8 @@ export type BuddyTheme = {
 };
 
 const bear: BuddyTheme = {
-  pageBackground:
-    "bg-gradient-to-br from-amber-50 via-orange-50/95 to-amber-100/90",
+  bgBase:
+    "bg-[linear-gradient(130deg,#fffbeb_0%,#fef9c3_45%,#ffedd5_100%)]",
   blurLeft: "bg-gradient-to-br from-amber-200/60 via-amber-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-orange-200/55 via-orange-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-amber-200/40 via-amber-100/25 to-transparent",
@@ -73,8 +74,8 @@ const bear: BuddyTheme = {
 };
 
 const dog: BuddyTheme = {
-  pageBackground:
-    "bg-gradient-to-br from-blue-50 via-sky-50/95 to-indigo-50/90",
+  bgBase:
+    "bg-[linear-gradient(130deg,#f0f9ff_0%,#e0f2fe_45%,#e0e7ff_100%)]",
   blurLeft: "bg-gradient-to-br from-blue-200/60 via-blue-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-sky-200/55 via-sky-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-indigo-200/40 via-indigo-100/25 to-transparent",
@@ -114,8 +115,8 @@ const dog: BuddyTheme = {
 };
 
 const fox: BuddyTheme = {
-  pageBackground:
-    "bg-gradient-to-br from-orange-50 via-amber-50/95 to-orange-100/90",
+  bgBase:
+    "bg-[linear-gradient(130deg,#fff7ed_0%,#ffedd5_45%,#fef3c7_100%)]",
   blurLeft: "bg-gradient-to-br from-orange-200/60 via-orange-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-amber-200/55 via-amber-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-red-200/40 via-red-100/25 to-transparent",
@@ -156,8 +157,8 @@ const fox: BuddyTheme = {
 };
 
 const owl: BuddyTheme = {
-  pageBackground:
-    "bg-gradient-to-br from-purple-50 via-violet-50/95 to-fuchsia-50/90",
+  bgBase:
+    "bg-[linear-gradient(130deg,#faf5ff_0%,#ede9fe_45%,#fae8ff_100%)]",
   blurLeft: "bg-gradient-to-br from-purple-200/60 via-purple-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-violet-200/55 via-violet-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-fuchsia-200/40 via-fuchsia-100/25 to-transparent",
@@ -198,8 +199,8 @@ const owl: BuddyTheme = {
 };
 
 const panda: BuddyTheme = {
-  pageBackground:
-    "bg-gradient-to-br from-emerald-50 via-teal-50/95 to-green-50/90",
+  bgBase:
+    "bg-[linear-gradient(130deg,#f0fdf4_0%,#ecfdf5_45%,#f0fdfa_100%)]",
   blurLeft: "bg-gradient-to-br from-emerald-200/60 via-emerald-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-teal-200/55 via-teal-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-green-200/40 via-green-100/25 to-transparent",
@@ -241,8 +242,8 @@ const panda: BuddyTheme = {
 };
 
 const loveyCat: BuddyTheme = {
-  pageBackground:
-    "bg-gradient-to-br from-pink-50 via-rose-50/95 to-fuchsia-50/90",
+  bgBase:
+    "bg-[linear-gradient(130deg,#fdf2f8_0%,#ffe4e6_45%,#fce7f3_100%)]",
   blurLeft: "bg-gradient-to-br from-pink-200/60 via-pink-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-rose-200/55 via-rose-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-fuchsia-200/40 via-fuchsia-100/25 to-transparent",
