@@ -59,15 +59,39 @@ export default function Home() {
       }
 
       try {
-        const { data, error } = await supabase
+        type PackRow = { id?: string | null; name?: string | null; title?: string | null };
+        let data: PackRow[] | null = null;
+
+        const withBoth = await supabase
           .from("packs")
           .select("id,name,title")
           .eq("enabled", true);
+        if (withBoth.error) {
+          const code = (withBoth.error as { code?: string }).code;
+          const msg = (withBoth.error as { message?: string }).message ?? "";
+          if (code === "42703" && msg.includes("name")) {
+            const withTitle = await supabase
+              .from("packs")
+              .select("id,title")
+              .eq("enabled", true);
+            if (withTitle.error) throw withTitle.error;
+            data = withTitle.data;
+          } else if (code === "42703" && msg.includes("title")) {
+            const withName = await supabase
+              .from("packs")
+              .select("id,name")
+              .eq("enabled", true);
+            if (withName.error) throw withName.error;
+            data = withName.data;
+          } else {
+            throw withBoth.error;
+          }
+        } else {
+          data = withBoth.data;
+        }
 
-        if (error) throw error;
         if (isCancelled) return;
 
-        type PackRow = { id?: string | null; name?: string | null; title?: string | null };
         const normalized: Pack[] = (data ?? [])
           .map((row: PackRow) => {
             const id = row?.id;
