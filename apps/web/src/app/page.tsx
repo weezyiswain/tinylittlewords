@@ -209,7 +209,7 @@ export default function Home() {
           left: "-15vmin",
           top: "-15vmin",
           width: "calc(100vw + 30vmin)",
-          height: "calc(100vh + 30vmin)",
+          height: "calc(100dvh + env(safe-area-inset-bottom, 0px) + 30vmin)",
         }}
         aria-hidden
       >
@@ -247,10 +247,10 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="relative flex w-full max-w-xl flex-col"
+        className={cn("relative flex w-full max-w-xl flex-col", showLoading && "min-h-dvh")}
       >
         {showLoading ? (
-          <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
               Tiny Little Words
             </p>

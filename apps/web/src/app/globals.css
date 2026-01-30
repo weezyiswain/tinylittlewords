@@ -47,7 +47,7 @@
   --font-geist-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-geist-mono: "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --radius: 0.625rem;
-  --background: oklch(0.97 0.04 160);
+  --background: oklch(0.99 0.005 0);
   --foreground: oklch(0.28 0.05 35);
   --card: oklch(0.995 0.02 120);
   --card-foreground: var(--foreground);
