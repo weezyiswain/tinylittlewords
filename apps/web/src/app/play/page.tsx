@@ -642,7 +642,7 @@ function PlayPageContent() {
       <SheetContent
         side="bottom"
         className={cn(
-          "max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-6 pt-5 backdrop-blur",
+          "max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,34px))] pt-5 backdrop-blur",
           theme.sheetShadow
         )}
       >
@@ -896,11 +896,11 @@ function PlayPageContent() {
   return (
     <main
       className="fixed inset-0 flex flex-col overflow-hidden bg-[#fafafa]"
-      style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))" }}
+      style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))" }}
     >
       <div
         className="pointer-events-none absolute inset-0 -z-10"
-        style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))" }}
+        style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))" }}
       >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
