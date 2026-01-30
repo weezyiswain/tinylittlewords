@@ -35,7 +35,7 @@ export type BuddyTheme = {
 
 const bear: BuddyTheme = {
   bgBase:
-    "bg-[linear-gradient(180deg,#fffbeb_0%,#fef9c3_40%,#ffedd5_70%,#ffffff_100%)]",
+    "bg-[linear-gradient(180deg,#fffbeb_0%,#fef9c3_40%,#ffedd5_70%,#fafafa_100%)]",
   blurLeft: "bg-gradient-to-br from-amber-200/60 via-amber-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-orange-200/55 via-orange-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-amber-200/40 via-amber-100/25 to-transparent",
@@ -77,7 +77,7 @@ const bear: BuddyTheme = {
 
 const dog: BuddyTheme = {
   bgBase:
-    "bg-[linear-gradient(160deg,#f0f9ff_0%,#e0f2fe_40%,#e0e7ff_70%,#ffffff_100%)]",
+    "bg-[linear-gradient(180deg,#f0f9ff_0%,#e0f2fe_40%,#e0e7ff_70%,#fafafa_100%)]",
   blurLeft: "bg-gradient-to-br from-blue-200/60 via-blue-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-sky-200/55 via-sky-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-indigo-200/40 via-indigo-100/25 to-transparent",
@@ -162,7 +162,7 @@ const fox: BuddyTheme = {
 
 const owl: BuddyTheme = {
   bgBase:
-    "bg-[linear-gradient(180deg,#faf5ff_0%,#ede9fe_40%,#fae8ff_70%,#ffffff_100%)]",
+    "bg-[linear-gradient(180deg,#faf5ff_0%,#ede9fe_40%,#fae8ff_70%,#fafafa_100%)]",
   blurLeft: "bg-gradient-to-br from-purple-200/60 via-purple-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-violet-200/55 via-violet-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-fuchsia-200/40 via-fuchsia-100/25 to-transparent",
@@ -249,7 +249,7 @@ const panda: BuddyTheme = {
 
 const loveyCat: BuddyTheme = {
   bgBase:
-    "bg-[linear-gradient(180deg,#fdf2f8_0%,#ffe4e6_40%,#fce7f3_70%,#ffffff_100%)]",
+    "bg-[linear-gradient(180deg,#fdf2f8_0%,#ffe4e6_40%,#fce7f3_70%,#fafafa_100%)]",
   blurLeft: "bg-gradient-to-br from-pink-200/60 via-pink-100/40 to-transparent",
   blurRight: "bg-gradient-to-br from-rose-200/55 via-rose-100/35 to-transparent",
   blurCenter: "bg-gradient-to-br from-fuchsia-200/40 via-fuchsia-100/25 to-transparent",

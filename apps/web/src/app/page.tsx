@@ -397,12 +397,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div
-              className="shrink-0 w-full pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]"
-              style={{
-                background: "linear-gradient(to top, rgba(255,255,255,0.95) 50%, transparent)",
-              }}
-            >
+            <div className="shrink-0 w-full border-t border-white/50 bg-white/80 pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
               <motion.button
                 type="button"
                 onClick={handleStart}
