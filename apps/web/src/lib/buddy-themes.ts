@@ -166,6 +166,8 @@ const fox: BuddyTheme = {
     "bg-gradient-to-r from-orange-200/70 via-orange-100/60 to-amber-200/70 shadow-[0_10px_22px_rgba(249,115,22,0.2)] hover:shadow-[0_12px_30px_rgba(249,115,22,0.3)]",
   revealButtonHighlight: "border-orange-400 bg-orange-100 text-orange-700",
   hintHeadingHighlight: "text-orange-700",
+  letterCorrect: "border-2 border-orange-500 bg-orange-500 text-white",
+  letterPresent: "border-2 border-amber-400 bg-amber-400 text-white",
 };
 
 const owl: BuddyTheme = {

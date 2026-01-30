@@ -312,13 +312,14 @@ function PlayPageContent() {
       : resolvedSurprisePack?.name ?? null;
 
   useEffect(() => {
-    if (packId || !supabase) return;
+    const client = supabase;
+    if (packId || !client) return;
     let isCancelled = false;
 
     const resolveSurprisePack = async () => {
       try {
         let data: PackRow[] | null = null;
-        const withBoth = await supabase
+        const withBoth = await client
           .from("packs")
           .select("id,name,title")
           .eq("enabled", true);
@@ -326,14 +327,14 @@ function PlayPageContent() {
           const code = (withBoth.error as { code?: string }).code;
           const msg = (withBoth.error as { message?: string }).message ?? "";
           if (code === "42703" && msg.includes("name")) {
-            const withTitle = await supabase
+            const withTitle = await client
               .from("packs")
               .select("id,title")
               .eq("enabled", true);
             if (withTitle.error) throw withTitle.error;
             data = withTitle.data;
           } else if (code === "42703" && msg.includes("title")) {
-            const withName = await supabase
+            const withName = await client
               .from("packs")
               .select("id,name")
               .eq("enabled", true);
@@ -465,7 +466,7 @@ function PlayPageContent() {
     return () => {
       isCancelled = true;
     };
-  }, [effectivePackId, wordLength]);
+  }, [effectivePackId, wordLength, packId, resolvedSurprisePack]);
 
   useEffect(() => {
     if (wordPool.length === 0) {
@@ -1037,6 +1038,11 @@ function PlayPageContent() {
           transition={{ duration: 0.35, ease: "easeOut" }}
           className="flex min-h-0 flex-1 flex-col gap-2 sm:gap-4"
         >
+          {packLabel != null && packLabel.trim() !== "" && (
+            <p className="shrink-0 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-[0.7rem]">
+              Pack: {packLabel}
+            </p>
+          )}
           <div
             className={cn(
               "flex min-h-0 flex-1 flex-col overflow-hidden space-y-2 rounded-3xl border border-white/70 bg-white/85 p-3 backdrop-blur sm:space-y-4 sm:p-4",
