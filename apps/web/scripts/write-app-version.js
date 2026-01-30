@@ -9,7 +9,7 @@ const pkgPath = path.join(__dirname, "..", "package.json");
 const outPath = path.join(__dirname, "..", "src", "lib", "app-version.ts");
 
 let majorMinor = "1.0";
-let usePackageVersion = false;
+let packageVersion = null;
 try {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
   if (typeof pkg.version === "string" && /^\d+\.\d+/.test(pkg.version)) {
@@ -17,7 +17,7 @@ try {
     majorMinor = `${parts[0]}.${parts[1]}`;
     // If package.json has full semver (e.g. 1.0.2), use it as the app version
     if (parts.length >= 3 && /^\d+$/.test(parts[2])) {
-      usePackageVersion = true;
+      packageVersion = pkg.version;
     }
   }
 } catch {
