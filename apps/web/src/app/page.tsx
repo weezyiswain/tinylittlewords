@@ -237,7 +237,7 @@ export default function Home() {
           </>
         )}
       </div>
-      <main className="relative flex min-h-dvh flex-col items-center overflow-y-auto px-4 py-8 pt-[max(2rem,calc(env(safe-area-inset-top,0px)+1.5rem))] pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:px-10 sm:py-12">
+      <main className="relative flex h-dvh min-h-dvh flex-col items-center overflow-hidden px-4 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-8 sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]">
       <Script
         id="home-structured-data"
         type="application/ld+json"
@@ -247,22 +247,24 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className={cn("relative flex w-full max-w-xl flex-col", showLoading && "min-h-dvh")}
+        className="flex h-full w-full max-w-xl flex-col"
       >
         {showLoading ? (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
-              Tiny Little Words
-            </p>
-            <div className="flex items-center gap-1.5" aria-hidden>
-              <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s] [animation-delay:0.15s]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s] [animation-delay:0.3s]" />
+          <div className="fixed inset-0 z-0 flex items-center justify-center px-4">
+            <div className="flex flex-col items-center gap-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
+                Tiny Little Words
+              </p>
+              <div className="flex items-center gap-1.5" aria-hidden>
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s] [animation-delay:0.15s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-500 animate-bounce [animation-duration:1.2s] [animation-delay:0.3s]" />
+              </div>
             </div>
           </div>
         ) : (
           <>
-            <div className="space-y-3 pb-4 pt-1 sm:space-y-5 sm:pb-6">
+            <div className="shrink-0 py-2 sm:py-3">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
@@ -280,10 +282,13 @@ export default function Home() {
                   </Link>
                 </Button>
               </div>
+            </div>
 
+            <div className="min-h-0 flex-1 overflow-y-auto py-2">
+              <div className="space-y-2.5 sm:space-y-3">
               <section
                 className={cn(
-                  "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-5",
+                  "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4",
                   theme.cardShadow
                 )}
               >
@@ -294,7 +299,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3" role="radiogroup" aria-label="Select word length">
+                <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-label="Select word length">
                   {WORD_LENGTH_OPTIONS.map((lengthOption) => (
                     <button
                       key={lengthOption}
@@ -304,7 +309,7 @@ export default function Home() {
                       aria-checked={lengthOption === selectedLength}
                       aria-label={`${lengthOption}-letter words (${AGE_SHORT_COPY[lengthOption]})`}
                       className={cn(
-                        "flex h-20 flex-col items-center justify-center rounded-2xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                        "flex h-16 flex-col items-center justify-center rounded-xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-[4.5rem]",
                         theme.wordLengthBase,
                         theme.wordLengthHover,
                         "hover:border-neutral-400",
@@ -313,7 +318,7 @@ export default function Home() {
                           : "text-foreground"
                       )}
                     >
-                      <span className="text-2xl font-bold">{lengthOption}</span>
+                      <span className="text-xl font-bold sm:text-2xl">{lengthOption}</span>
                       <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
                         {AGE_SHORT_COPY[lengthOption]}
                       </span>
@@ -324,7 +329,7 @@ export default function Home() {
 
               <section
                 className={cn(
-                  "rounded-2xl border border-white/70 bg-white/80 p-5 backdrop-blur",
+                  "rounded-2xl border border-white/70 bg-white/80 p-4 backdrop-blur",
                   theme.cardShadowAlt
                 )}
               >
@@ -335,7 +340,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4" role="radiogroup" aria-label="Pick adventure buddy">
+                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3" role="radiogroup" aria-label="Pick adventure buddy">
                   {AVATAR_OPTIONS.map((opt) => {
                     const isSelected = avatar.id === opt.id;
                     return (
@@ -389,10 +394,11 @@ export default function Home() {
                 </div>
               </section>
 
+              </div>
             </div>
 
             <div
-              className="sticky bottom-0 left-0 right-0 mt-auto w-full pt-6 pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
+              className="shrink-0 w-full pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]"
               style={{
                 background: "linear-gradient(to top, rgba(255,255,255,0.95) 50%, transparent)",
               }}
