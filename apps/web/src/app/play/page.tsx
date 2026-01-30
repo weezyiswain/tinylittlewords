@@ -829,19 +829,19 @@ function PlayPageContent() {
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(
-            "absolute -top-24 left-[-15%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-80 sm:w-80 sm:opacity-100",
+            "absolute -top-24 left-[-15%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
             theme.blurLeft
           )}
         />
         <div
           className={cn(
-            "absolute bottom-[-18%] right-[-10%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-96 sm:w-96 sm:opacity-100",
+            "absolute bottom-[-18%] right-[-10%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
             theme.blurRight
           )}
         />
         <div
           className={cn(
-            "absolute top-1/3 right-1/2 h-32 w-32 translate-x-1/2 rounded-full blur-3xl opacity-60 sm:h-72 sm:w-72 sm:opacity-100",
+            "absolute top-1/3 right-1/2 h-20 w-20 translate-x-1/2 rounded-full blur-3xl opacity-30 sm:h-28 sm:w-28 sm:opacity-40",
             theme.blurCenter
           )}
         />

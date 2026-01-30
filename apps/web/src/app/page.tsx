@@ -216,24 +216,24 @@ export default function Home() {
         <div className={cn("absolute inset-0", theme.bgBase)} />
         <div
           className={cn(
-            "absolute -top-24 left-[-12%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-72 sm:w-72 sm:opacity-100",
+            "absolute -top-24 left-[-12%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
             theme.blurLeft
           )}
         />
         <div
           className={cn(
-            "absolute -bottom-24 right-[-10%] h-40 w-40 rounded-full blur-3xl opacity-70 sm:h-80 sm:w-80 sm:opacity-100",
+            "absolute -bottom-24 right-[-10%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
             theme.blurRight
           )}
         />
         <div
           className={cn(
-            "absolute bottom-1/3 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full blur-3xl opacity-60 sm:h-64 sm:w-64 sm:opacity-100",
+            "absolute top-1/2 left-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-30 sm:h-28 sm:w-28 sm:opacity-40",
             theme.blurCenter
           )}
         />
       </div>
-      <main className="relative flex h-dvh min-h-dvh flex-col items-center overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
+      <main className="relative flex min-h-dvh flex-col items-center overflow-y-auto px-4 py-8 pt-[max(2rem,calc(env(safe-area-inset-top,0px)+1.5rem))] pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:px-10 sm:py-12">
       <Script
         id="home-structured-data"
         type="application/ld+json"
@@ -243,10 +243,10 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="relative flex min-h-0 flex-1 flex-col w-full max-w-xl"
+        className="relative flex w-full max-w-xl flex-col"
       >
         {showLoading ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4">
+          <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
               Tiny Little Words
             </p>
@@ -258,8 +258,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="flex-1 min-h-0 overflow-y-auto pb-16 pt-0.5 sm:pb-20">
-              <div className="mx-4 space-y-3 sm:mx-8 sm:space-y-5">
+            <div className="space-y-3 pb-4 pt-1 sm:space-y-5 sm:pb-6">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
@@ -386,10 +385,14 @@ export default function Home() {
                 </div>
               </section>
 
-              </div>
             </div>
 
-            <div className="flex-shrink-0 mx-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-8">
+            <div
+              className="sticky bottom-0 left-0 right-0 mx-4 mt-auto pt-6 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:mx-8"
+              style={{
+                background: "linear-gradient(to top, var(--background) 60%, transparent)",
+              }}
+            >
               <motion.button
                 type="button"
                 onClick={handleStart}
