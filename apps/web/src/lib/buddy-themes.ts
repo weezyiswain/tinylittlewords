@@ -31,6 +31,10 @@ export type BuddyTheme = {
   revealButton: string;
   revealButtonHighlight: string;
   hintHeadingHighlight: string;
+  /** Perfect spot (correct letter, correct position) - grid + keyboard */
+  letterCorrect: string;
+  /** Move me (letter in word, wrong position) - grid + keyboard */
+  letterPresent: string;
 };
 
 const bear: BuddyTheme = {
@@ -73,6 +77,8 @@ const bear: BuddyTheme = {
     "bg-gradient-to-r from-amber-200/70 via-amber-100/60 to-orange-200/70 shadow-[0_10px_22px_rgba(251,191,36,0.2)] hover:shadow-[0_12px_30px_rgba(251,191,36,0.3)]",
   revealButtonHighlight: "border-amber-400 bg-amber-100 text-amber-700",
   hintHeadingHighlight: "text-amber-700",
+  letterCorrect: "border-2 border-amber-500 bg-amber-500 text-white",
+  letterPresent: "border-2 border-orange-400 bg-orange-400 text-white",
 };
 
 const dog: BuddyTheme = {
@@ -115,6 +121,8 @@ const dog: BuddyTheme = {
     "bg-gradient-to-r from-blue-200/70 via-blue-100/60 to-sky-200/70 shadow-[0_10px_22px_rgba(59,130,246,0.2)] hover:shadow-[0_12px_30px_rgba(59,130,246,0.3)]",
   revealButtonHighlight: "border-blue-400 bg-blue-100 text-blue-700",
   hintHeadingHighlight: "text-blue-700",
+  letterCorrect: "border-2 border-blue-500 bg-blue-500 text-white",
+  letterPresent: "border-2 border-sky-400 bg-sky-400 text-white",
 };
 
 const fox: BuddyTheme = {
@@ -201,6 +209,8 @@ const owl: BuddyTheme = {
     "bg-gradient-to-r from-purple-200/70 via-purple-100/60 to-violet-200/70 shadow-[0_10px_22px_rgba(168,85,247,0.2)] hover:shadow-[0_12px_30px_rgba(168,85,247,0.3)]",
   revealButtonHighlight: "border-purple-400 bg-purple-100 text-purple-700",
   hintHeadingHighlight: "text-purple-700",
+  letterCorrect: "border-2 border-purple-500 bg-purple-500 text-white",
+  letterPresent: "border-2 border-violet-400 bg-violet-400 text-white",
 };
 
 const panda: BuddyTheme = {
@@ -245,6 +255,8 @@ const panda: BuddyTheme = {
     "bg-gradient-to-r from-emerald-200/70 via-emerald-100/60 to-teal-200/70 shadow-[0_10px_22px_rgba(16,185,129,0.2)] hover:shadow-[0_12px_30px_rgba(16,185,129,0.3)]",
   revealButtonHighlight: "border-emerald-400 bg-emerald-100 text-emerald-700",
   hintHeadingHighlight: "text-emerald-700",
+  letterCorrect: "border-2 border-emerald-500 bg-emerald-500 text-white",
+  letterPresent: "border-2 border-teal-400 bg-teal-400 text-white",
 };
 
 const loveyCat: BuddyTheme = {
@@ -288,6 +300,8 @@ const loveyCat: BuddyTheme = {
     "bg-gradient-to-r from-pink-200/70 via-pink-100/60 to-rose-200/70 shadow-[0_10px_22px_rgba(236,72,153,0.2)] hover:shadow-[0_12px_30px_rgba(236,72,153,0.3)]",
   revealButtonHighlight: "border-pink-400 bg-pink-100 text-pink-700",
   hintHeadingHighlight: "text-pink-700",
+  letterCorrect: "border-2 border-pink-500 bg-pink-500 text-white",
+  letterPresent: "border-2 border-rose-400 bg-rose-400 text-white",
 };
 
 const THEMES: Record<string, BuddyTheme> = {

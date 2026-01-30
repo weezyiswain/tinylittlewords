@@ -237,7 +237,7 @@ export default function Home() {
           </>
         )}
       </div>
-      <main className="relative flex h-dvh min-h-dvh flex-col items-center overflow-hidden px-4 pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-8 sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]">
+      <main className="relative flex h-dvh min-h-dvh flex-col overflow-hidden pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]">
       <Script
         id="home-structured-data"
         type="application/ld+json"
@@ -247,7 +247,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="flex h-full w-full max-w-xl flex-col"
+        className="flex h-full w-full flex-col"
       >
         {showLoading ? (
           <div className="fixed inset-0 z-0 flex items-center justify-center px-4">
@@ -264,8 +264,8 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="shrink-0 py-2 sm:py-3">
-              <div className="flex items-center justify-between gap-3">
+            <div className="shrink-0 w-full px-4 sm:px-8">
+              <div className="mx-auto flex max-w-xl items-center justify-between gap-3 py-2 sm:py-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
                 </p>
@@ -284,8 +284,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto py-2">
-              <div className="space-y-2.5 sm:space-y-3">
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full">
+              <div className="mx-auto max-w-xl space-y-2.5 px-4 py-2 sm:space-y-3 sm:px-8">
               <section
                 className={cn(
                   "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4",
@@ -370,7 +370,7 @@ export default function Home() {
 
               <section
                 className={cn(
-                  "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-5",
+                  "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4",
                   theme.cardShadow
                 )}
               >
@@ -397,20 +397,22 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="shrink-0 w-full border-t border-white/50 bg-white/80 pt-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
-              <motion.button
-                type="button"
-                onClick={handleStart}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  "w-full rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                  theme.ctaGradient,
-                  theme.ctaShadow,
-                  theme.ctaShadowHover
-                )}
-              >
-                Start playing
-              </motion.button>
+            <div className="shrink-0 w-full px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-3 sm:px-8">
+              <div className="mx-auto max-w-xl">
+                <motion.button
+                  type="button"
+                  onClick={handleStart}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    "w-full rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    theme.ctaGradient,
+                    theme.ctaShadow,
+                    theme.ctaShadowHover
+                  )}
+                >
+                  Start playing
+                </motion.button>
+              </div>
             </div>
           </>
         )}

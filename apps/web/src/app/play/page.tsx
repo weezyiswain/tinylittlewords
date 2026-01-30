@@ -211,6 +211,8 @@ function HintList({
   );
 }
 
+type PackRow = { id?: string | null; name?: string | null; title?: string | null };
+
 type SupabaseWordRow = {
   text: string;
   length: number;
@@ -271,13 +273,13 @@ function PlayPageContent() {
   const packId = searchParams?.get("pack") ?? null;
   const packName = searchParams?.get("packName") ?? null;
   const seed = searchParams?.get("seed") ?? null;
-  const packLabel =
-    typeof packName === "string" && packName.trim().length > 0
-      ? packName
-      : "Surprise me";
   const avatar = useMemo(() => chooseAvatar(avatarId), [avatarId]);
   const theme = useMemo(() => getBuddyTheme(avatar.id), [avatar.id]);
 
+  const [resolvedSurprisePack, setResolvedSurprisePack] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [wordPool, setWordPool] = useState<Puzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<Puzzle | null>(null);
   const [wordSource, setWordSource] = useState<"supabase" | "fallback">(
@@ -303,11 +305,78 @@ function PlayPageContent() {
   const targetWord = currentPuzzle?.word ?? "";
   const activeHints = currentPuzzle?.hints ?? [];
 
+  const effectivePackId = packId ?? resolvedSurprisePack?.id ?? null;
+  const packLabel =
+    packId && typeof packName === "string" && packName.trim().length > 0
+      ? packName
+      : resolvedSurprisePack?.name ?? null;
+
   useEffect(() => {
+    if (packId || !supabase) return;
+    let isCancelled = false;
+
+    const resolveSurprisePack = async () => {
+      try {
+        let data: PackRow[] | null = null;
+        const withBoth = await supabase
+          .from("packs")
+          .select("id,name,title")
+          .eq("enabled", true);
+        if (withBoth.error) {
+          const code = (withBoth.error as { code?: string }).code;
+          const msg = (withBoth.error as { message?: string }).message ?? "";
+          if (code === "42703" && msg.includes("name")) {
+            const withTitle = await supabase
+              .from("packs")
+              .select("id,title")
+              .eq("enabled", true);
+            if (withTitle.error) throw withTitle.error;
+            data = withTitle.data;
+          } else if (code === "42703" && msg.includes("title")) {
+            const withName = await supabase
+              .from("packs")
+              .select("id,name")
+              .eq("enabled", true);
+            if (withName.error) throw withName.error;
+            data = withName.data;
+          } else {
+            throw withBoth.error;
+          }
+        } else {
+          data = withBoth.data;
+        }
+
+        const list = (data ?? [])
+          .map((row: PackRow) => {
+            const id = row?.id;
+            const name = (row?.name ?? row?.title)?.trim();
+            if (!id || typeof name !== "string" || !name) return null;
+            return { id, name };
+          })
+          .filter((p): p is { id: string; name: string } => p !== null);
+
+        if (!isCancelled && list.length > 0) {
+          const chosen = list[Math.floor(Math.random() * list.length)]!;
+          setResolvedSurprisePack(chosen);
+        }
+      } catch {
+        if (!isCancelled) setResolvedSurprisePack({ id: "", name: "Random" });
+      }
+    };
+
+    void resolveSurprisePack();
+    return () => {
+      isCancelled = true;
+    };
+  }, [packId]);
+
+  useEffect(() => {
+    if (packId === null && resolvedSurprisePack === null) return;
     let isCancelled = false;
 
     const loadWords = async () => {
       setWordFetchError(null);
+      const filterPackId = effectivePackId || undefined;
 
       try {
         if (!supabase) {
@@ -328,11 +397,11 @@ function PlayPageContent() {
               typeof row?.text === "string" && typeof row?.length === "number"
           );
 
-        if (packId) {
+        if (filterPackId) {
           const { data: packWordData, error: packWordError } = await supabase
             .from("pack_words")
             .select("words(text,length)")
-            .eq("pack_id", packId);
+            .eq("pack_id", filterPackId);
 
           if (packWordError) throw packWordError;
 
@@ -378,7 +447,7 @@ function PlayPageContent() {
       setWordFetchError((prev) =>
         prev
           ? `${prev} (using fallback list)`
-          : packId
+          : filterPackId
           ? "No words available for this pack right now."
           : "No words returned from Supabase."
       );
@@ -396,7 +465,7 @@ function PlayPageContent() {
     return () => {
       isCancelled = true;
     };
-  }, [packId, wordLength]);
+  }, [effectivePackId, wordLength]);
 
   useEffect(() => {
     if (wordPool.length === 0) {
@@ -497,7 +566,7 @@ function PlayPageContent() {
                 The Goal
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Type a {wordLength}-letter word. Keep trying until every tile shines green!
+                Type a {wordLength}-letter word. Keep trying until every tile is in the perfect spot!
               </p>
             </section>
 
@@ -1000,10 +1069,8 @@ function PlayPageContent() {
                           key={`row-${rowIndex}-cell-${letterIndex}`}
                           className={cn(
                             "flex min-h-[2.25rem] items-center justify-center rounded-lg border text-base font-bold uppercase transition sm:text-lg lg:text-xl",
-                            status === "correct" &&
-                              "border-emerald-500 bg-emerald-500 text-white",
-                            status === "present" &&
-                              "border-amber-400 bg-amber-400 text-white",
+                            status === "correct" && theme.letterCorrect,
+                            status === "present" && theme.letterPresent,
                             status === "absent" &&
                               "border-slate-300 bg-slate-200 text-slate-600",
                             !status &&
@@ -1104,14 +1171,6 @@ function PlayPageContent() {
     <div className="shrink-0 w-full">
       <div className="mx-auto w-full max-w-none">
         <div className="flex flex-col items-center justify-center gap-1">
-          <span
-            className={cn(
-              "inline-flex items-center rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[0.675rem] font-semibold uppercase tracking-[0.25em] text-muted-foreground",
-              theme.backButton
-            )}
-          >
-            Pack: {packLabel}
-          </span>
           <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
         </div>
         <motion.nav
@@ -1134,10 +1193,8 @@ function PlayPageContent() {
                         void handleSubmit();
                       }}
                       className={cn(
-                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-transparent text-xs font-semibold uppercase text-white transition active:scale-[0.98] sm:h-12 sm:text-sm",
-                        `bg-gradient-to-r ${theme.ctaGradient}`,
-                        theme.ctaShadow,
-                        theme.ctaShadowHover
+                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-base font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-lg",
+                        theme.keyBase
                       )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Submit guess"
@@ -1152,12 +1209,10 @@ function PlayPageContent() {
                           type="button"
                           onClick={() => handleLetter(key)}
                           className={cn(
-                            "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                            "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-base font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-lg sm:min-w-[2.4rem]",
                             theme.keyBase,
-                            status === "correct" &&
-                              "border-emerald-500 bg-emerald-500 text-white",
-                            status === "present" &&
-                              "border-amber-400 bg-amber-400 text-white",
+                            status === "correct" && theme.letterCorrect,
+                            status === "present" && theme.letterPresent,
                             status === "absent" &&
                               "border-slate-300 bg-slate-200 text-slate-600",
                             (isGameOver || isCheckingWord) && "opacity-70"
@@ -1173,7 +1228,7 @@ function PlayPageContent() {
                       type="button"
                       onClick={handleBackspace}
                       className={cn(
-                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border border-white/70 bg-white/85 text-foreground transition active:scale-[0.98] sm:h-12",
+                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-foreground transition active:scale-[0.98] sm:h-12",
                         theme.keyBase
                       )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
@@ -1191,12 +1246,10 @@ function PlayPageContent() {
                         type="button"
                         onClick={() => handleLetter(key)}
                         className={cn(
-                          "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border border-white/70 bg-white/85 text-sm font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-base sm:min-w-[2.4rem]",
+                          "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-base font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-lg sm:min-w-[2.4rem]",
                           theme.keyBase,
-                          status === "correct" &&
-                            "border-emerald-500 bg-emerald-500 text-white",
-                          status === "present" &&
-                            "border-amber-400 bg-amber-400 text-white",
+                          status === "correct" && theme.letterCorrect,
+                          status === "present" && theme.letterPresent,
                           status === "absent" &&
                             "border-slate-300 bg-slate-200 text-slate-600",
                           (isGameOver || isCheckingWord) && "opacity-70"
