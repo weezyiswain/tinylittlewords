@@ -204,12 +204,10 @@ export default function Home() {
   return (
     <>
       <div
-        className="pointer-events-none fixed -z-10"
+        className="pointer-events-none fixed left-0 right-0 top-0 -z-10"
         style={{
-          left: "-15vmin",
-          top: "-15vmin",
-          width: "calc(100vw + 30vmin)",
-          height: "calc(100dvh + env(safe-area-inset-bottom, 0px) + 30vmin)",
+          bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))",
+          minHeight: "max(100dvh, 100svh)",
         }}
         aria-hidden
       >
