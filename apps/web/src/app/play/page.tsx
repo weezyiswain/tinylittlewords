@@ -1190,7 +1190,7 @@ function PlayPageContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
           className={cn(
-            "mt-2 w-full border-t border-white/60 bg-white pb-[max(1rem,env(safe-area-inset-bottom,0px))]",
+            "mt-2 w-full border-t border-white/60 bg-white pb-[calc(0.5rem+env(safe-area-inset-bottom,34px))] sm:pb-[calc(1.5rem+env(safe-area-inset-bottom,34px))] lg:pb-[calc(2rem+env(safe-area-inset-bottom,34px))]",
             theme.bottomBarShadow
           )}
         >

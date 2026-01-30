@@ -398,7 +398,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="shrink-0 w-full px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-3 sm:px-8">
+            <div className="shrink-0 w-full px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom,34px))] sm:px-8 sm:pb-[calc(2rem+env(safe-area-inset-bottom,34px))]">
               <div className="mx-auto max-w-xl">
                 <motion.button
                   type="button"
