@@ -894,8 +894,15 @@ function PlayPageContent() {
   }, []);
 
   return (
-    <main className="relative flex h-dvh min-h-dvh flex-col overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 -z-10">
+    <main
+      className="relative flex flex-col overflow-hidden min-h-dvh"
+      style={{
+        minHeight: "calc(max(100dvh, 100svh) + env(safe-area-inset-bottom, 0px))",
+      }}
+    >
+      <div className="pointer-events-none absolute inset-0 -z-10 min-h-[100dvh]"
+        style={{ minHeight: "calc(max(100dvh, 100svh) + env(safe-area-inset-bottom, 0px))" }}
+      >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(

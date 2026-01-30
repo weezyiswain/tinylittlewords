@@ -125,6 +125,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Match app gradient bottom (#fafafa) so any bottom strip on home/play doesn’t show contrasting white */
+    background-color: #fafafa;
     background-image:
       linear-gradient(130deg, #f8fafc 0%, #f1f5f9 45%, #f8fafc 100%);
     background-attachment: fixed;

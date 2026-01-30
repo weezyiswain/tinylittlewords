@@ -235,7 +235,10 @@ export default function Home() {
           </>
         )}
       </div>
-      <main className="fixed inset-0 flex flex-col overflow-hidden pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]">
+      <main
+        className="fixed left-0 right-0 top-0 flex flex-col overflow-hidden pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]"
+        style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))" }}
+      >
       <Script
         id="home-structured-data"
         type="application/ld+json"
