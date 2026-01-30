@@ -9,11 +9,16 @@ const pkgPath = path.join(__dirname, "..", "package.json");
 const outPath = path.join(__dirname, "..", "src", "lib", "app-version.ts");
 
 let majorMinor = "1.0";
+let usePackageVersion = false;
 try {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
   if (typeof pkg.version === "string" && /^\d+\.\d+/.test(pkg.version)) {
     const parts = pkg.version.split(".");
     majorMinor = `${parts[0]}.${parts[1]}`;
+    // If package.json has full semver (e.g. 1.0.2), use it as the app version
+    if (parts.length >= 3 && /^\d+$/.test(parts[2])) {
+      usePackageVersion = true;
+    }
   }
 } catch {
   // keep default
@@ -51,7 +56,7 @@ if (process.env.APP_VERSION_PATCH != null && process.env.APP_VERSION_PATCH !== "
   }
 }
 
-const version = `${majorMinor}.${patch}`;
+const version = packageVersion != null ? packageVersion : `${majorMinor}.${patch}`;
 
 const content = `/** App version: major.minor from package.json + git commit count (X.X.X). Auto-updates on deploy. */
 export const APP_VERSION = "${version}";

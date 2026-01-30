@@ -214,24 +214,28 @@ export default function Home() {
         aria-hidden
       >
         <div className={cn("absolute inset-0", theme.bgBase)} />
-        <div
-          className={cn(
-            "absolute -top-24 left-[-12%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
-            theme.blurLeft
-          )}
-        />
-        <div
-          className={cn(
-            "absolute -bottom-24 right-[-10%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
-            theme.blurRight
-          )}
-        />
-        <div
-          className={cn(
-            "absolute top-1/2 left-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-30 sm:h-28 sm:w-28 sm:opacity-40",
-            theme.blurCenter
-          )}
-        />
+        {!showLoading && (
+          <>
+            <div
+              className={cn(
+                "absolute -top-24 left-[-12%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
+                theme.blurLeft
+              )}
+            />
+            <div
+              className={cn(
+                "absolute -bottom-24 right-[-10%] h-24 w-24 rounded-full blur-3xl opacity-40 sm:h-40 sm:w-40 sm:opacity-50",
+                theme.blurRight
+              )}
+            />
+            <div
+              className={cn(
+                "absolute top-1/2 left-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-30 sm:h-28 sm:w-28 sm:opacity-40",
+                theme.blurCenter
+              )}
+            />
+          </>
+        )}
       </div>
       <main className="relative flex min-h-dvh flex-col items-center overflow-y-auto px-4 py-8 pt-[max(2rem,calc(env(safe-area-inset-top,0px)+1.5rem))] pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+1rem))] sm:px-10 sm:py-12">
       <Script
@@ -331,7 +335,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-2.5" role="radiogroup" aria-label="Pick adventure buddy">
+                <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4" role="radiogroup" aria-label="Pick adventure buddy">
                   {AVATAR_OPTIONS.map((opt) => {
                     const isSelected = avatar.id === opt.id;
                     return (
@@ -343,7 +347,7 @@ export default function Home() {
                           aria-label={`${opt.emoji} buddy`}
                           onClick={() => setAvatar(opt)}
                           className={cn(
-                            "flex h-full w-full flex-col items-center justify-center rounded-2xl border p-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                            "flex h-full w-full flex-col items-center justify-center rounded-xl border p-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                             isSelected
                               ? cn(opt.bgSelected, theme.buddySelectedBorder, "shadow-[0_8px_20px_rgba(0,0,0,0.08)]")
                               : cn(opt.bg, "border-transparent hover:border-primary/40")
@@ -388,9 +392,9 @@ export default function Home() {
             </div>
 
             <div
-              className="sticky bottom-0 left-0 right-0 mx-4 mt-auto pt-6 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:mx-8"
+              className="sticky bottom-0 left-0 right-0 mt-auto w-full pt-6 pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
               style={{
-                background: "linear-gradient(to top, var(--background) 60%, transparent)",
+                background: "linear-gradient(to top, rgba(255,255,255,0.95) 50%, transparent)",
               }}
             >
               <motion.button
