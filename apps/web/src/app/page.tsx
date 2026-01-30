@@ -237,7 +237,7 @@ export default function Home() {
           </>
         )}
       </div>
-      <main className="relative flex h-dvh min-h-dvh flex-col overflow-hidden pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]">
+      <main className="fixed inset-0 flex flex-col overflow-hidden pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]">
       <Script
         id="home-structured-data"
         type="application/ld+json"
@@ -340,11 +340,11 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3" role="radiogroup" aria-label="Pick adventure buddy">
+                <div className="mt-3 flex flex-nowrap items-center justify-center gap-2 sm:gap-3" role="radiogroup" aria-label="Pick adventure buddy">
                   {AVATAR_OPTIONS.map((opt) => {
                     const isSelected = avatar.id === opt.id;
                     return (
-                      <div key={opt.id} className="aspect-square w-full min-w-0">
+                      <div key={opt.id} className="flex-shrink-0">
                         <button
                           type="button"
                           role="radio"
@@ -352,7 +352,7 @@ export default function Home() {
                           aria-label={`${opt.emoji} buddy`}
                           onClick={() => setAvatar(opt)}
                           className={cn(
-                            "flex h-full w-full flex-col items-center justify-center rounded-xl border p-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                            "flex h-12 w-12 flex-col items-center justify-center rounded-xl border p-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-14 sm:w-14",
                             isSelected
                               ? cn(opt.bgSelected, theme.buddySelectedBorder, "shadow-[0_8px_20px_rgba(0,0,0,0.08)]")
                               : cn(opt.bg, "border-transparent hover:border-primary/40")
