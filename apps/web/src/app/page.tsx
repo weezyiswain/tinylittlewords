@@ -204,14 +204,14 @@ export default function Home() {
   return (
     <>
       <div
-        className="pointer-events-none fixed left-0 right-0 top-0 -z-10"
+        className="pointer-events-none fixed inset-0 -z-10"
         style={{
           bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))",
           minHeight: "max(100dvh, 100svh)",
         }}
         aria-hidden
       >
-        <div className={cn("absolute inset-0", theme.bgBase)} />
+        <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         {!showLoading && (
           <>
             <div
@@ -236,7 +236,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="fixed left-0 right-0 top-0 flex flex-col overflow-hidden pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]"
+        className="fixed inset-0 flex flex-col overflow-hidden bg-[#fafafa] pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]"
         style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))" }}
       >
       <Script

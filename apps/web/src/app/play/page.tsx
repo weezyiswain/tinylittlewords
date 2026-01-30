@@ -895,13 +895,12 @@ function PlayPageContent() {
 
   return (
     <main
-      className="relative flex flex-col overflow-hidden min-h-dvh"
-      style={{
-        minHeight: "calc(max(100dvh, 100svh) + env(safe-area-inset-bottom, 0px))",
-      }}
+      className="fixed inset-0 flex flex-col overflow-hidden bg-[#fafafa]"
+      style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))" }}
     >
-      <div className="pointer-events-none absolute inset-0 -z-10 min-h-[100dvh]"
-        style={{ minHeight: "calc(max(100dvh, 100svh) + env(safe-area-inset-bottom, 0px))" }}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))" }}
       >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
@@ -1191,7 +1190,7 @@ function PlayPageContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
           className={cn(
-            "mt-2 w-full border-t border-white/60 bg-white pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]",
+            "mt-2 w-full border-t border-white/60 bg-white pb-[max(1rem,env(safe-area-inset-bottom,0px))]",
             theme.bottomBarShadow
           )}
         >
