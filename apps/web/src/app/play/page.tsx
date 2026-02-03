@@ -425,7 +425,7 @@ function PlayPageContent() {
         </DialogTrigger>
         <DialogContent
           className={cn(
-            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg,#fafafa)] px-6 pt-6 pb-[max(1rem,env(safe-area-inset-bottom,44px))]",
+            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg,#fafafa)] px-6 pt-6 pb-4",
             theme.resultModal
           )}
         >

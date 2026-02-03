@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Download, Share2 } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, Download, Share2, Sparkles } from "lucide-react";
 
 import { APP_VERSION } from "@/lib/app-version";
 import { canonicalUrl, seoConfig } from "@/lib/seo";
@@ -24,7 +24,7 @@ function InfoRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 border-b border-neutral-100 last:border-b-0">
+    <div className="flex items-center justify-between gap-4 border-b border-neutral-100 py-3 first:pt-0 last:border-b-0 last:pb-0">
       <span className="text-sm font-medium text-neutral-900">{label}</span>
       <span className="text-sm text-neutral-600 tabular-nums">{value}</span>
     </div>
@@ -43,6 +43,7 @@ export default function ParentsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [showVersionModal, setShowVersionModal] = useState(false);
+  const [showAppDetails, setShowAppDetails] = useState(false);
   const [showInstallBlock, setShowInstallBlock] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -81,62 +82,186 @@ export default function ParentsPage() {
 
   return (
     <main
-      className="min-h-dvh bg-neutral-50 px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}
+      className="min-h-dvh bg-[#fafafa] px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12"
+      style={{ paddingBottom: "1.5rem" }}
     >
-      <div className="mx-auto max-w-xl space-y-6">
+      <div className="mx-auto max-w-xl space-y-8">
+        {/* Header */}
         <div className="flex items-center">
           <Link
             href="/"
-            className="inline-flex min-w-[4rem] shrink-0 items-center gap-1 text-sm text-slate-500 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
+            className="inline-flex min-h-[44px] min-w-[4rem] shrink-0 items-center gap-1 text-sm text-slate-600 transition hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
             aria-label="Back to home"
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
             Back
           </Link>
-          <div className="flex flex-1 flex-col items-center justify-center text-center">
-            <h1 className="text-xl font-bold text-neutral-900">For parents</h1>
-            <p className="mt-1 text-sm text-neutral-500/80">
-              Tiny Little Words is in test mode.
-            </p>
-          </div>
+          <h1 className="flex flex-1 justify-center text-xl font-bold text-neutral-900">
+            For parents
+          </h1>
           <div className="min-w-[4rem] shrink-0" aria-hidden />
         </div>
 
-        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-neutral-900">About</h2>
-          <p className="mt-2 text-sm text-neutral-600">
-            Tiny Little Words started at home.
-          </p>
-          <p className="mt-3 text-sm text-neutral-600">
-            Our kids kept wanting to join in when we played word puzzles, but most games are built for adults and move too fast for early readers. We wanted something that felt welcoming, calm, and made kids feel successful.
-          </p>
-          <p className="mt-3 text-sm text-neutral-600">
-            This app is designed to help children build confidence with spelling and reading through short, repeatable word practice. It&apos;s especially well suited for early readers, emerging spellers, and homeschool families who want flexible, low-pressure ways to practice language skills.
-          </p>
-          <p className="mt-3 text-sm text-neutral-600">
-            We&apos;re exploring ways to focus practice around meaningful topics (like animals, food, or sports) as well as foundational language concepts such as nouns and verbs. The goal isn&apos;t speed or scores—it&apos;s comfort, repetition, and steady progress.
+        {/* Intro section - not in a card */}
+        <section>
+          <h2 className="text-2xl font-bold leading-tight text-neutral-900 sm:text-3xl">
+            Built for kids who want to play with words — not race through them.
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-neutral-600">
+            Tiny Little Words started at home. Our kids wanted to join in when we played word puzzles, but most games moved too fast and felt stressful. We wanted something calm, welcoming, and confidence-building.
           </p>
         </section>
 
-        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-neutral-900">Share with other parents</h2>
-          <p className="mt-1 text-sm text-neutral-600">
-            We&apos;re learning by testing with real families. If you know someone who might enjoy trying this with their kids, you&apos;re welcome to pass it along.
-          </p>
-          <p className="mt-3 text-sm text-neutral-600">
-            Tiny Little Words is still in an early testing phase. Your feedback helps us decide what to improve, what to build next, and whether this is worth investing more time into long-term.
-          </p>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => void handleShare()}
-            className="mt-4 border border-neutral-300 bg-white text-neutral-700 shadow-sm hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-neutral-500"
-          >
-            <Share2 className="h-4 w-4" aria-hidden />
-            Share this app
-          </Button>
+        {/* What we're focusing on */}
+        <section className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+          <h2 className="text-lg font-semibold text-neutral-900">What we&apos;re focusing on</h2>
+          <ul className="mt-5 space-y-5">
+            <li className="flex gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600" aria-hidden>
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900">Confidence over speed</h3>
+                <p className="mt-0.5 text-sm text-neutral-600">
+                  Short, repeatable puzzles that reward trying—not racing.
+                </p>
+              </div>
+            </li>
+            <li className="flex gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-600" aria-hidden>
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900">Early readers & homeschool families</h3>
+                <p className="mt-0.5 text-sm text-neutral-600">
+                  Designed for kids learning to spell, read, and recognize word patterns.
+                </p>
+              </div>
+            </li>
+            <li className="flex gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 text-lg" aria-hidden>
+                😊
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900">Meaningful practice</h3>
+                <p className="mt-0.5 text-sm text-neutral-600">
+                  Word packs based on topics kids care about (animals, food, sports) and language building blocks (nouns, verbs).
+                </p>
+              </div>
+            </li>
+          </ul>
         </section>
+
+        {/* Help shape what comes next */}
+        <section className="rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+          <h2 className="text-lg font-semibold text-neutral-900">Help shape what comes next</h2>
+          <p className="mt-2 text-sm text-neutral-600">
+            Trying it with your kids already helps. Sharing feedback — or passing it to another family — helps even more.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/feedback?from=parents" className="inline-block">
+              <Button
+                type="button"
+                size="lg"
+                className="min-h-[44px] min-w-[44px] rounded-xl bg-blue-600 px-5 text-white hover:bg-blue-700 focus-visible:ring-blue-500"
+              >
+                Give feedback
+              </Button>
+            </Link>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => void handleShare()}
+              className="min-h-[44px] min-w-[44px] rounded-xl border-neutral-300 bg-white px-5 text-neutral-700 shadow-sm hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-neutral-500"
+            >
+              <Share2 className="h-4 w-4" aria-hidden />
+              Share with another parent
+            </Button>
+          </div>
+        </section>
+
+        {/* App details - tappable row */}
+        <button
+          type="button"
+          onClick={() => setShowAppDetails(true)}
+          className="flex w-full items-center justify-between rounded-xl border border-neutral-200/80 bg-white px-5 py-4 text-left shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fafafa]"
+        >
+          <span className="font-medium text-neutral-900">App details</span>
+          <ChevronRight className="h-5 w-5 text-neutral-400" aria-hidden />
+        </button>
+
+        {/* App details modal */}
+        <Dialog open={showAppDetails} onOpenChange={setShowAppDetails}>
+          <DialogContent className="max-h-[85dvh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>App details</DialogTitle>
+              <DialogDescription>
+                Version and usage info for Tiny Little Words.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4">
+              <InfoRow
+                label="Version"
+                value={
+                  <span className="flex items-center justify-end gap-2">
+                    <span>{APP_VERSION}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setShowAppDetails(false);
+                        setShowVersionModal(true);
+                      }}
+                      className="h-7 shrink-0 rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800 focus-visible:ring-neutral-500"
+                    >
+                      Is this the latest?
+                    </Button>
+                  </span>
+                }
+              />
+              <InfoRow label="Games played" value={stats?.totalGames ?? 0} />
+              <InfoRow
+                label="Data storage"
+                value={
+                  <>
+                    This device only{" "}
+                    <span className="inline-flex items-center rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-500">
+                      local
+                    </span>
+                  </>
+                }
+              />
+            </div>
+            {showInstallBlock === true && (
+              <div className="mt-6 flex flex-col gap-3 border-t border-neutral-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Download className="h-5 w-5" aria-hidden />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Install as app</p>
+                    <p className="text-xs text-muted-foreground">
+                      Add to your home screen for quick access.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setShowAppDetails(false);
+                    setShowInstallModal(true);
+                  }}
+                  className="shrink-0 border border-blue-600 bg-white text-blue-600 shadow-sm hover:border-blue-700 hover:bg-blue-50 hover:text-blue-700 focus-visible:ring-blue-500"
+                >
+                  Show me how
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={showInstallModal} onOpenChange={setShowInstallModal}>
           <DialogContent className="max-h-[85dvh] overflow-y-auto">
@@ -186,79 +311,6 @@ export default function ParentsPage() {
             </DialogHeader>
           </DialogContent>
         </Dialog>
-
-        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-neutral-900">Feedback</h2>
-          <p className="mt-1 text-sm text-neutral-600">
-            We&apos;d love to hear from you—your feedback shapes what we build next.
-          </p>
-          <Link href="/feedback?from=parents" className="mt-4 inline-block">
-            <Button
-              type="button"
-              className="bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500"
-            >
-              Give feedback
-            </Button>
-          </Link>
-        </section>
-
-        <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-neutral-900">App info</h2>
-          <div className="mt-3">
-            <InfoRow
-              label="Version"
-              value={
-                <span className="flex items-center justify-end gap-2">
-                  <span>{APP_VERSION}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowVersionModal(true)}
-                    className="h-7 shrink-0 rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800 focus-visible:ring-neutral-500"
-                  >
-                    Is this the latest version?
-                  </Button>
-                </span>
-              }
-            />
-            <InfoRow label="Games played" value={stats?.totalGames ?? 0} />
-            <InfoRow
-              label="Data storage"
-              value={
-                <>
-                  This device only{" "}
-                  <span className="inline-flex items-center rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-500">
-                    local
-                  </span>
-                </>
-              }
-            />
-          </div>
-          {showInstallBlock === true && (
-            <div className="mt-4 flex flex-col gap-3 border-t border-neutral-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Download className="h-5 w-5" aria-hidden />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Install as app</p>
-                  <p className="text-xs text-muted-foreground">
-                    Add to your home screen for quick access.
-                  </p>
-                </div>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setShowInstallModal(true)}
-                className="shrink-0 border border-blue-600 bg-white text-blue-600 shadow-sm hover:bg-blue-50 hover:text-blue-700 hover:border-blue-700 focus-visible:ring-blue-500"
-              >
-                Show me how
-              </Button>
-            </div>
-          )}
-        </section>
       </div>
     </main>
   );

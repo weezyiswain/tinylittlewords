@@ -16,7 +16,7 @@ export default function Error({ error, reset }: ErrorProps) {
   return (
     <main
       className="flex min-h-dvh flex-col items-center justify-center bg-neutral-50 px-6 py-12 text-center"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}
+      style={{ paddingBottom: "1.5rem" }}
     >
       <div className="rounded-2xl border border-neutral-200 bg-white px-6 py-8 shadow-sm max-w-md">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">

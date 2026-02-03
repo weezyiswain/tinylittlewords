@@ -114,7 +114,7 @@ export function Keyboard({
         paddingLeft: "max(1.25rem, calc(env(safe-area-inset-left, 0px) + 1rem))",
         paddingRight: "max(1.25rem, calc(env(safe-area-inset-right, 0px) + 1rem))",
         paddingTop: "8px",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+        paddingBottom: "12px",
       }}
     >
       <div

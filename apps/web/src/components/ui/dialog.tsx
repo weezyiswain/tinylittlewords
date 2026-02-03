@@ -42,10 +42,7 @@ function DialogOverlay({
         "fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         className
       )}
-      style={{
-        bottom: "calc(-1 * env(safe-area-inset-bottom, 44px))",
-        ...style,
-      }}
+      style={style}
       {...props}
     />
   );
