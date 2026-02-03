@@ -825,6 +825,20 @@ function PlayPageContent() {
     router.push("/");
   }, [router, isOutOfTries]);
 
+  const handlePlayAgain = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set("length", String(wordLength));
+    params.set("avatar", avatar.id);
+    params.set("seed", String(Date.now()));
+    if (effectivePackId && (packLabel ?? "").trim()) {
+      params.set("pack", effectivePackId);
+      params.set("packName", (packLabel ?? "").trim());
+    } else {
+      params.set("packName", (packLabel ?? "Surprise me").trim() || "Surprise me");
+    }
+    router.push(`/play?${params.toString()}`);
+  }, [router, wordLength, avatar.id, effectivePackId, packLabel]);
+
   const revealHint = useCallback((index: number) => {
     setRevealedHints((prev) =>
       prev.map((flag, idx) => (idx === index ? true : flag))
@@ -924,12 +938,13 @@ function PlayPageContent() {
       </div>
       <div
         ref={scrollContainerRef}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-[#fafafa]"
+        style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
       >
-        <section className="mx-auto flex min-h-0 w-full flex-1 flex-col px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+1.25rem)] sm:px-6 sm:pb-4 sm:pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
+        <section className="mx-auto flex min-h-0 w-full flex-1 flex-col pb-2 pt-[calc(env(safe-area-inset-top,0px)+1.25rem)] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:pb-4 sm:pl-6 sm:pr-6 sm:pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
         <div className="hidden lg:block" aria-hidden />
 
-        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
+        <div className="flex min-h-0 min-w-0 w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
           <div
             className="mb-2 flex shrink-0 items-center gap-2 sm:mb-4 sm:gap-3"
             style={{ perspective: "1600px" }}
@@ -1075,7 +1090,7 @@ function PlayPageContent() {
                         <div
                           key={`row-${rowIndex}-cell-${letterIndex}`}
                           className={cn(
-                            "flex aspect-square min-h-0 max-h-9 w-full items-center justify-center rounded border text-sm font-bold uppercase transition sm:max-h-10 sm:text-base",
+                            "flex aspect-square min-h-0 w-full items-center justify-center rounded border text-sm font-bold uppercase transition sm:text-base",
                             status === "correct" &&
                               "border-emerald-500 bg-emerald-500 text-white",
                             status === "present" &&
@@ -1170,6 +1185,53 @@ function PlayPageContent() {
                 </div>
               </div>
             )}
+
+            {isGameOver && (
+              <div
+                className={cn(
+                  "rounded-2xl border px-4 py-4 shadow-md sm:px-5 sm:py-5",
+                  theme.statusCardFlip
+                )}
+              >
+                <p className="text-center text-base font-semibold text-foreground sm:text-lg">
+                  {isSolved ? "You did it!" : "Nice try!"}
+                </p>
+                <p className="mt-1 text-center text-sm text-muted-foreground">
+                  Play again with the same buddy & pack, or start a new game.
+                </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+                  <button
+                    type="button"
+                    onClick={handlePlayAgain}
+                    className={cn(
+                      "inline-flex items-center justify-center rounded-full bg-gradient-to-r px-5 py-3 text-base font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      theme.ctaGradient,
+                      theme.ctaShadow,
+                      theme.ctaShadowHover
+                    )}
+                  >
+                    Play again
+                  </button>
+                  <Link
+                    href="/"
+                    onClick={() => {
+                      if (isOutOfTries && !recordedForRoundRef.current) {
+                        recordedForRoundRef.current = true;
+                        recordGame(false);
+                        setStatsRefresh((n) => n + 1);
+                      }
+                    }}
+                    className={cn(
+                      "inline-flex items-center justify-center rounded-full border-2 bg-white/90 px-5 py-3 text-base font-semibold text-foreground transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      theme.buddySelectedBorder,
+                      "hover:opacity-90"
+                    )}
+                  >
+                    New game
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
         </motion.section>
@@ -1177,7 +1239,7 @@ function PlayPageContent() {
         </section>
       </div>
 
-    <div className="shrink-0 w-full">
+    <div className="shrink-0 w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:px-6">
       <div className="mx-auto w-full max-w-none">
         <div className="flex flex-col items-center justify-center gap-1">
           <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
@@ -1187,7 +1249,7 @@ function PlayPageContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
           className={cn(
-            "mt-1 w-full border-t border-white/40 bg-transparent px-4 pb-[calc(1rem+env(safe-area-inset-bottom,34px))] pt-3 sm:px-6 sm:pb-[calc(1.25rem+env(safe-area-inset-bottom,34px))] lg:pb-[calc(1.5rem+env(safe-area-inset-bottom,34px))]",
+            "mt-1 w-full shrink-0 border-t border-white/40 bg-transparent pb-[calc(2rem+env(safe-area-inset-bottom,34px))] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pt-3 sm:pb-[calc(2.25rem+env(safe-area-inset-bottom,34px))] sm:pl-6 sm:pr-6 lg:pb-[calc(2.5rem+env(safe-area-inset-bottom,34px))]",
             theme.bottomBarShadow
           )}
         >
