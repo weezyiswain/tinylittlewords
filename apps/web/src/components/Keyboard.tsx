@@ -10,10 +10,10 @@ const ROW1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
 const ROW2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
 const ROW3 = ["Z", "X", "C", "V", "B", "N", "M"];
 
-/* Keys scale down on narrow screens to prevent horizontal overflow */
-const KEY_SIZE = "clamp(28px, 7.5vw, 48px)";
+/* iOS-like: square-ish keys, scale down on narrow screens */
+const KEY_SIZE = "clamp(32px, 8vw, 48px)";
 const KEY_GAP = "6px";
-const KEY_RADIUS = "14px";
+const KEY_RADIUS = "9px";
 
 type KeyboardProps = {
   keyboardStatus: Record<string, LetterStatus>;
@@ -49,15 +49,15 @@ function LetterKey({
         borderRadius: KEY_RADIUS,
       }}
       className={cn(
-        "flex shrink-0 items-center justify-center border font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(14px,3vw,17px)]",
+        "flex shrink-0 items-center justify-center border border-slate-200/80 font-semibold transition-transform duration-75 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(14px,3vw,17px)]",
         !status &&
-          "border-neutral-300 bg-[#e8eaed] text-foreground active:bg-[#dce0e5]",
+          "border-slate-200 bg-slate-100 text-slate-800 active:bg-slate-200",
         status === "correct" &&
-          "border-emerald-500 bg-emerald-500 text-white shadow-[0_1px_0_rgba(0,0,0,0.15)]",
+          "border-emerald-500 bg-emerald-500 text-white",
         status === "present" &&
-          "border-amber-400 bg-amber-400 text-white shadow-[0_1px_0_rgba(0,0,0,0.15)]",
+          "border-amber-400 bg-amber-400 text-white",
         status === "absent" &&
-          "border-neutral-400 bg-[#9ca3af] text-white/90 shadow-[0_1px_0_rgba(0,0,0,0.15)]"
+          "border-slate-400 bg-slate-500 text-white"
       )}
       aria-label={`Letter ${letter}`}
     >
@@ -90,8 +90,8 @@ function ActionKey({
         borderRadius: KEY_RADIUS,
       }}
       className={cn(
-        "flex min-w-0 flex-1 items-center justify-center border font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(12px,2.8vw,15px)]",
-        "border-neutral-400 bg-[#9ca3af] text-white shadow-[0_1px_0_rgba(0,0,0,0.15)] active:bg-[#8b92a0]"
+        "flex min-w-0 flex-1 items-center justify-center border border-slate-200/80 font-semibold transition-transform duration-75 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(12px,2.8vw,15px)]",
+        "border-slate-200 bg-slate-400 text-white active:bg-slate-500"
       )}
       aria-label={ariaLabel}
     >

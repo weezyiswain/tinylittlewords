@@ -230,7 +230,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#fafafa]"
+        className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[var(--app-bg,#fafafa)]"
       >
       <Script
         id="home-structured-data"
@@ -270,7 +270,7 @@ export default function Home() {
             </header>
 
             <div
-              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-contain bg-[#fafafa]"
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-contain bg-[var(--app-bg,#fafafa)]"
               style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
             >
               <div className="mx-auto max-w-xl space-y-2.5 px-4 py-4 sm:space-y-3 sm:px-8 sm:py-6">

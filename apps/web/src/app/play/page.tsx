@@ -24,9 +24,9 @@ import {
 import { getBuddyTheme, type BuddyTheme } from "@/lib/buddy-themes";
 import { getFallbackPuzzles, Puzzle } from "@/lib/game-data";
 import { addWordToDictionary, isValidWord } from "@/lib/dictionary";
-import { recordGame } from "@/lib/stats";
+import { getStats, recordGame } from "@/lib/stats";
 import { supabase } from "@/lib/supabaseClient";
-import { StatsDisplay } from "@/components/stats-display";
+import { GameInfoCarousel } from "@/components/GameInfoCarousel";
 import {
   Dialog,
   DialogContent,
@@ -35,14 +35,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetDescription,
-} from "@/components/ui/sheet";
 
 type LetterStatus = "correct" | "present" | "absent";
 
@@ -78,90 +70,6 @@ function buildHints(word: string): string[] {
   }
 
   return hints.slice(0, upper.length >= 5 ? 2 : 1);
-}
-
-type HintListProps = {
-  hints: string[];
-  revealed: boolean[];
-  onReveal: (index: number) => void;
-  theme: BuddyTheme;
-  className?: string;
-  highlight?: boolean;
-};
-
-function HintList({
-  hints,
-  revealed,
-  onReveal,
-  theme,
-  className,
-  highlight = false,
-}: HintListProps) {
-  const firstHiddenIndex = revealed.findIndex((flag) => !flag);
-  const showButtonHighlight = highlight && firstHiddenIndex !== -1;
-
-  return (
-    <section
-      className={cn(
-        "rounded-2xl border border-white/70 bg-white/85 px-4 py-4 backdrop-blur transition",
-        theme.hintSection,
-        highlight && theme.hintSectionHighlight,
-        className
-      )}
-    >
-      <h2
-        className={cn(
-          "text-base font-semibold text-foreground",
-          highlight && theme.hintHeadingHighlight
-        )}
-      >
-        Hints
-      </h2>
-      <ul className="mt-2 space-y-2 overflow-y-auto pr-1 text-sm text-muted-foreground sm:max-h-40 max-h-28">
-        {hints.length === 0 ? (
-          <li className="rounded-lg border border-dashed border-primary/30 bg-gradient-to-r from-primary/10 via-white/90 to-teal-50/60 px-3 py-1.5 text-xs text-muted-foreground">
-            No hints just yet—trust your instincts!
-          </li>
-        ) : (
-          hints.map((hint, index) => {
-            const isRevealed = revealed[index];
-            return (
-              <li
-                key={hint}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg border border-transparent px-2 py-1 transition",
-                  isRevealed
-                    ? "border-primary/20 bg-primary/5"
-                    : "hover:border-primary/20 hover:bg-primary/5"
-                )}
-              >
-                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm text-primary">
-                  💡
-                </span>
-                {isRevealed ? (
-                  <span className="text-foreground">{hint}</span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => onReveal(index)}
-                    className={cn(
-                      "inline-flex w-full items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      theme.revealButton,
-                      showButtonHighlight &&
-                        index === firstHiddenIndex &&
-                        cn(theme.revealButtonHighlight, "animate-bounce")
-                    )}
-                  >
-                    Reveal hint
-                  </button>
-                )}
-              </li>
-            );
-          })
-        )}
-      </ul>
-    </section>
-  );
 }
 
 type PackRow = { id?: string | null; name?: string | null; title?: string | null };
@@ -215,7 +123,6 @@ export default function PlayPage() {
 function PlayPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isHintSheetOpen, setIsHintSheetOpen] = useState(false);
 
   const lengthFromParams = Number(searchParams?.get("length") ?? NaN);
   const wordLength =
@@ -230,8 +137,8 @@ function PlayPageContent() {
   const boardContainerStyle = useMemo(
     () =>
       ({
-        "--tile-size": "clamp(44px, 10vw, 60px)",
-        "--tile-gap": "clamp(6px, 1.5vw, 10px)",
+        "--tile-size": "clamp(52px, 12vw, 72px)",
+        "--tile-gap": "clamp(8px, 1.8vw, 12px)",
         width: "100%",
         maxWidth: `calc(var(--tile-size) * ${wordLength} + var(--tile-gap) * ${Math.max(
           0,
@@ -285,8 +192,14 @@ function PlayPageContent() {
   const [statsRefresh, setStatsRefresh] = useState(0);
   const [invalidWordShake, setInvalidWordShake] = useState(false);
   const [lastEvaluatedRowIndex, setLastEvaluatedRowIndex] = useState<number | null>(null);
-  const [buddyAnimation, setBuddyAnimation] = useState<"correct" | "present" | "absent" | null>(null);
+  const [buddyAnimation, setBuddyAnimation] = useState<boolean>(false);
+  const [statsForCarousel, setStatsForCarousel] = useState({ winsToday: 0, streak: 0 });
   const recordedForRoundRef = useRef(false);
+
+  useEffect(() => {
+    const s = getStats();
+    setStatsForCarousel({ winsToday: s.winsToday, streak: s.streak });
+  }, [statsRefresh]);
 
   const targetWord = currentPuzzle?.word ?? "";
   const activeHints = currentPuzzle?.hints ?? [];
@@ -475,6 +388,7 @@ function PlayPageContent() {
     setShowRetryPrompt(false);
     setLastEvaluatedRowIndex(null);
     setInvalidWordShake(false);
+    setBuddyAnimation(false);
     recordedForRoundRef.current = false;
   }, [currentPuzzle, activeHints.length]);
 
@@ -491,7 +405,7 @@ function PlayPageContent() {
   const shouldHighlightHints =
     (isFinalChanceWithHint || (showRetryPrompt && hasHintAvailable)) &&
     !isSolved;
-  const hintButtonHighlight = shouldHighlightHints && !isHintSheetOpen && hasHintAvailable;
+  const hintButtonHighlight = shouldHighlightHints && hasHintAvailable;
   const renderHintHelp = (
     buttonClassName?: string,
     _variant: "default" | "muted" = "default"
@@ -511,7 +425,7 @@ function PlayPageContent() {
         </DialogTrigger>
         <DialogContent
           className={cn(
-            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[#fafafa] px-6 pt-6 pb-[max(1rem,env(safe-area-inset-bottom,0px))]",
+            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg,#fafafa)] px-6 pt-6 pb-[max(1rem,env(safe-area-inset-bottom,44px))]",
             theme.resultModal
           )}
         >
@@ -576,7 +490,7 @@ function PlayPageContent() {
                 <li>
                   Start with different letters like <span className="font-semibold text-foreground">RAIN</span> or <span className="font-semibold text-foreground">BIRD</span>.
                 </li>
-                <li>Look at the hints above the keyboard—they’re friendly clue cards.</li>
+                <li>Swipe the bar below the grid to find hints—they’re friendly clue cards.</li>
                 <li>If you’re stuck, peek at a hint or try swapping the letters around.</li>
               </ul>
             </section>
@@ -585,51 +499,6 @@ function PlayPageContent() {
       </Dialog>
     );
   };
-
-  const renderHintAccess = (compact?: boolean) => (
-    <Sheet open={isHintSheetOpen} onOpenChange={setIsHintSheetOpen}>
-      <SheetTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "inline-flex shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-4 text-sm font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-            compact ? "h-9 px-5" : "h-11 px-5 sm:h-11",
-            theme.backButton,
-            hintButtonHighlight && cn(theme.hintHighlight, "animate-bounce")
-          )}
-          aria-label="View hints"
-        >
-          Hint{activeHints.length > 1 ? "s" : ""}
-          {hasHintAvailable ? ` (${hintsLeft})` : ""}
-        </button>
-      </SheetTrigger>
-      <SheetContent
-        side="bottom"
-        className={cn(
-          "max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-[#fafafa] px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,44px))] pt-5 backdrop-blur",
-          theme.sheetShadow
-        )}
-      >
-        <SheetHeader className="pb-2 text-center">
-          <SheetTitle className="text-xl font-bold text-foreground">
-            Word Hint{activeHints.length === 1 ? "" : "s"}
-          </SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground">
-            Reveal hints one at a time whenever you need a nudge.
-          </SheetDescription>
-        </SheetHeader>
-        <div className="space-y-4 overflow-y-auto pb-4">
-          <HintList
-            hints={activeHints}
-            revealed={revealedHints}
-            onReveal={revealHint}
-            theme={theme}
-            highlight={shouldHighlightHints}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
 
   const updateKeyboard = useCallback(
     (guess: string, evaluation: LetterStatus[]) => {
@@ -718,13 +587,10 @@ function PlayPageContent() {
 
       const hasCorrect = evaluation.some((s) => s === "correct");
       const hasPresent = evaluation.some((s) => s === "present");
-      const anim: "correct" | "present" | "absent" = hasCorrect
-        ? "correct"
-        : hasPresent
-          ? "present"
-          : "absent";
-      setBuddyAnimation(anim);
-      setTimeout(() => setBuddyAnimation(null), 400);
+      if (hasCorrect || hasPresent) {
+        setBuddyAnimation(true);
+        setTimeout(() => setBuddyAnimation(false), 400);
+      }
 
       const nextIsSolved = currentGuess === targetWord;
       const nextGuessCount = guesses.length + 1;
@@ -833,7 +699,7 @@ function PlayPageContent() {
   }, [handleBackspace, handleLetter, handleSubmit]);
 
   return (
-    <main className="relative flex min-h-[100dvh] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[#fafafa]">
+    <main className="relative flex min-h-[100dvh] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg,#fafafa)]">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
@@ -857,8 +723,8 @@ function PlayPageContent() {
       </div>
 
       <header
-        className="relative z-10 flex w-full shrink-0 items-center justify-between pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pb-2 pt-3 sm:pl-6 sm:pr-6"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+        className="relative z-10 flex w-full shrink-0 items-center justify-between pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] py-2 sm:pl-6 sm:pr-6"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.5rem)" }}
       >
         <Link
           href="/"
@@ -870,28 +736,17 @@ function PlayPageContent() {
 
         <motion.div
           className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/85 text-2xl shadow-[0_6px_16px_rgba(0,0,0,0.1)] backdrop-blur sm:h-14 sm:w-14",
+            "flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/85 text-2xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] backdrop-blur sm:h-16 sm:w-16 sm:text-3xl",
             avatar.bg
           )}
           aria-hidden
           animate={
-            buddyAnimation === "correct"
+            buddyAnimation
               ? {
-                  scale: [1, 1.15, 1.1, 1],
+                  scale: [1, 1.1, 1.05, 1],
                   transition: { duration: 0.35, ease: "easeOut" },
                 }
-              : buddyAnimation === "present"
-                ? {
-                    scale: [1, 1.06, 1],
-                    rotate: [0, -4, 4, 0],
-                    transition: { duration: 0.3, ease: "easeOut" },
-                  }
-                : buddyAnimation === "absent"
-                  ? {
-                      x: [0, -4, 4, -2, 2, 0],
-                      transition: { duration: 0.25, ease: "easeOut" },
-                    }
-                  : undefined
+              : undefined
           }
         >
           {avatar.emoji}
@@ -906,14 +761,8 @@ function PlayPageContent() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="flex min-h-0 flex-1 flex-col gap-3"
+            className="flex min-h-0 flex-1 flex-col gap-4"
           >
-            {packLabel != null && packLabel.trim() !== "" && (
-              <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-[0.7rem]">
-                Pack: {packLabel}
-              </p>
-            )}
-
             <div className="flex min-h-0 flex-1 flex-col gap-4">
               <div
                 className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-2 sm:px-4"
@@ -958,18 +807,18 @@ function PlayPageContent() {
                               <motion.div
                                 key={`row-${rowIndex}-cell-${letterIndex}`}
                                 className={cn(
-                                  "flex aspect-square min-h-0 w-full items-center justify-center rounded border text-sm font-bold uppercase sm:text-base",
+                                  "flex aspect-square min-h-0 w-full items-center justify-center rounded-xl border text-base font-semibold uppercase sm:text-lg",
                                   status === "correct" &&
                                     "border-emerald-500 bg-emerald-500 text-white",
                                   status === "present" &&
                                     "border-amber-400 bg-amber-400 text-white",
                                   status === "absent" &&
-                                    "border-slate-300 bg-slate-200 text-slate-600",
+                                    "border-slate-300 bg-slate-400 text-white",
                                   !status &&
                                     letter &&
-                                    "border-primary/60 bg-primary/10 text-primary",
+                                    "border-slate-300 bg-slate-50 text-primary",
                                   !letter &&
-                                    "border-border bg-background text-muted-foreground/40"
+                                    "border-slate-200 bg-slate-50/80 text-muted-foreground/40"
                                 )}
                                 initial={false}
                                 animate={
@@ -1113,14 +962,19 @@ function PlayPageContent() {
         </div>
       </section>
 
+      <GameInfoCarousel
+        packLabel={packLabel}
+        hints={activeHints}
+        revealedHints={revealedHints}
+        onRevealHint={revealHint}
+        highlightHintSlide={hintButtonHighlight}
+        winsToday={statsForCarousel.winsToday}
+        streak={statsForCarousel.streak}
+        statsRefresh={statsRefresh}
+      />
+
       <footer className="relative z-10 w-full min-w-0 shrink-0 overflow-x-hidden bg-transparent">
-        <div className="w-full min-w-0 pt-2">
-          <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col items-center justify-center gap-2 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
-            <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
-          </div>
-          <div className="flex justify-center py-2">
-            {renderHintAccess(true)}
-          </div>
+        <div className="w-full min-w-0">
           <Keyboard
             keyboardStatus={keyboardStatus}
             onLetter={handleLetter}
