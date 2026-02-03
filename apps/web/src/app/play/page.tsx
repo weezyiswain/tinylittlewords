@@ -12,8 +12,9 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronLeft, Delete, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
+import { ChevronLeft, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
 
+import { Keyboard } from "@/components/Keyboard";
 import { cn } from "@/lib/utils";
 import {
   AVATAR_OPTIONS,
@@ -47,12 +48,6 @@ type LetterStatus = "correct" | "present" | "absent";
 
 const WORD_LENGTHS = [3, 4, 5] as const;
 const MAX_GUESSES = 6;
-
-const KEYBOARD_ROWS = [
-  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Z", "X", "C", "V", "B", "N", "M"],
-] as const;
 
 const STATUS_PRIORITY: Record<LetterStatus, number> = {
   absent: 1,
@@ -1236,122 +1231,18 @@ function PlayPageContent() {
         </div>
       </section>
 
-      <footer className="relative z-10 w-full border-t border-white/60 bg-white/95 backdrop-blur">
-        <div
-          className="w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pt-3 sm:pl-6 sm:pr-6 sm:pt-4"
-          style={{
-            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
-          }}
-        >
-          <div className="mx-auto w-full max-w-3xl">
-            <div className="flex flex-col items-center justify-center gap-2">
-              <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
-            </div>
+      <footer className="relative z-10 w-full shrink-0 bg-transparent">
+        <div className="w-full pt-3">
+          <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center gap-2 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
+            <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
           </div>
-          <motion.nav
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-            className={cn(
-              "mt-3 w-full border border-white/60 bg-white/90 py-3 shadow-lg sm:py-4",
-              theme.bottomBarShadow
-            )}
-          >
-            <div className="mx-auto w-full max-w-[540px] px-3 sm:px-4">
-              <div className="flex w-full flex-col gap-1.5 sm:gap-2">
-                {KEYBOARD_ROWS.map((row, rowIndex) => (
-                  <div
-                    key={`kb-row-${rowIndex}`}
-                    className="flex w-full flex-wrap justify-center gap-1.5"
-                  >
-                    {rowIndex === KEYBOARD_ROWS.length - 1 ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void handleSubmit();
-                          }}
-                          className={cn(
-                            "ios-key flex h-14 min-w-[3rem] flex-none items-center justify-center rounded-[7px] border-0 bg-[#acb4be] px-3 text-sm font-semibold uppercase text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] sm:h-[3.5rem] sm:min-w-[3.5rem] sm:text-base",
-                            (isGameOver || isCheckingWord) && "opacity-70"
-                          )}
-                          disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                          aria-label="Submit guess"
-                        >
-                          Enter
-                        </button>
-                        {row.map((key) => {
-                          const status = keyboardStatus[key];
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              onClick={() => handleLetter(key)}
-                              className={cn(
-                                "ios-key flex h-14 min-w-[1.85rem] flex-none items-center justify-center rounded-[7px] border-0 px-2 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] sm:h-[3.5rem] sm:min-w-[2.2rem] sm:text-xl",
-                                !status &&
-                                  "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
-                                status === "correct" &&
-                                  "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                                status === "present" &&
-                                  "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                                status === "absent" &&
-                                  "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                                (isGameOver || isCheckingWord) && "opacity-70"
-                              )}
-                              disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                              aria-label={`Letter ${key}`}
-                            >
-                              {key}
-                            </button>
-                          );
-                        })}
-                        <button
-                          type="button"
-                          onClick={handleBackspace}
-                          className={cn(
-                            "ios-key flex h-14 min-w-[3rem] flex-none items-center justify-center rounded-[7px] border-0 bg-[#acb4be] px-3 text-foreground shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] sm:h-[3.5rem] sm:min-w-[3.5rem]",
-                            (isGameOver || isCheckingWord) && "opacity-70"
-                          )}
-                          disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                          aria-label="Delete letter"
-                        >
-                          <Delete className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
-                        </button>
-                      </>
-                    ) : (
-                      row.map((key) => {
-                        const status = keyboardStatus[key];
-                        return (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => handleLetter(key)}
-                            className={cn(
-                              "ios-key flex h-14 min-w-[1.85rem] flex-none items-center justify-center rounded-[7px] border-0 px-2 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] sm:h-[3.5rem] sm:min-w-[2.2rem] sm:text-xl",
-                              !status &&
-                                "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
-                              status === "correct" &&
-                                "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                              status === "present" &&
-                                "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                              status === "absent" &&
-                                "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                              (isGameOver || isCheckingWord) && "opacity-70"
-                            )}
-                            disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                            aria-label={`Letter ${key}`}
-                          >
-                            {key}
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.nav>
+          <Keyboard
+            keyboardStatus={keyboardStatus}
+            onLetter={handleLetter}
+            onBackspace={handleBackspace}
+            onSubmit={() => void handleSubmit()}
+            disabled={isGameOver || !currentPuzzle || isCheckingWord}
+          />
         </div>
       </footer>
     </main>
