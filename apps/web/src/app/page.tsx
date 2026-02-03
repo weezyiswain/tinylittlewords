@@ -271,8 +271,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full">
-              <div className="mx-auto max-w-xl space-y-2.5 px-4 py-2 sm:space-y-3 sm:px-8">
+            <div
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-behavior-contain bg-[#fafafa]"
+              style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+            >
+              <div className="mx-auto max-w-xl space-y-2.5 px-4 py-2 pb-[calc(2rem+env(safe-area-inset-bottom,34px))] sm:space-y-3 sm:px-8 sm:pb-[calc(2.5rem+env(safe-area-inset-bottom,34px))]">
               <section
                 className={cn(
                   "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4",
@@ -381,10 +384,7 @@ export default function Home() {
                 </div>
               </section>
 
-              </div>
-            </div>
-
-            <div className="shrink-0 w-full px-4 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom,34px))] sm:px-8 sm:pb-[calc(2.5rem+env(safe-area-inset-bottom,34px))]">
+            <div className="w-full pt-4 sm:pt-6">
               <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
                 <motion.button
                   type="button"
@@ -405,6 +405,9 @@ export default function Home() {
                 >
                   For parents
                 </Link>
+              </div>
+            </div>
+
               </div>
             </div>
           </>

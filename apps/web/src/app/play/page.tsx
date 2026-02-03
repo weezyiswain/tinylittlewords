@@ -1049,12 +1049,7 @@ function PlayPageContent() {
               Pack: {packLabel}
             </p>
           )}
-          <div
-            className={cn(
-              "flex min-h-0 flex-1 flex-col overflow-hidden space-y-2 rounded-3xl border border-white/70 bg-white/85 p-3 backdrop-blur sm:space-y-4 sm:p-4",
-              theme.resultModal
-            )}
-          >
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden space-y-2 p-2 sm:space-y-3 sm:p-3">
             <div className="grid grid-flow-row auto-rows-min gap-1 sm:gap-1.5">
               {Array.from({ length: allowedGuesses }).map((_, rowIndex) => {
                 const guess = guesses[rowIndex] ?? "";
