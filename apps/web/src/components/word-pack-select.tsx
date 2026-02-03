@@ -86,7 +86,7 @@ export function WordPackSelect({
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"
-          className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/70 bg-[var(--app-bg)] px-0 pb-[max(1rem,var(--safe-bottom))] pt-0 shadow-[0_-20px_45px_rgba(20,184,166,0.12)]"
+          className="max-h-[85dvh] w-full rounded-t-3xl border-t border-white/70 bg-[var(--app-bg)] px-0 pb-[max(1rem,var(--safe-bottom-fill))] pt-0 shadow-[0_-20px_45px_rgba(20,184,166,0.12)]"
         >
           <SheetHeader className="px-4 pr-12 pt-5 pb-2 text-left">
             <SheetTitle className="text-lg font-semibold text-foreground">
@@ -101,7 +101,7 @@ export function WordPackSelect({
               type="button"
               onClick={() => handleSelect(null)}
               className={cn(
-                "flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium transition hover:bg-primary/10 focus:bg-primary/10 focus:outline-none",
+                "flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium transition hover:bg-primary/10 focus:outline-none focus-visible:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-inset",
                 !value && "bg-primary/10 text-primary"
               )}
             >
@@ -115,7 +115,7 @@ export function WordPackSelect({
                 type="button"
                 onClick={() => handleSelect(pack.id)}
                 className={cn(
-                  "flex w-full items-center rounded-xl px-3 py-3 text-left text-sm font-medium transition hover:bg-primary/10 focus:bg-primary/10 focus:outline-none",
+                  "flex w-full items-center rounded-xl px-3 py-3 text-left text-sm font-medium transition hover:bg-primary/10 focus:outline-none focus-visible:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-inset",
                   value === pack.id && "bg-primary/10 text-primary"
                 )}
               >

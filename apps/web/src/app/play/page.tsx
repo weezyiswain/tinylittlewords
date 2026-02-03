@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ChevronLeft, HelpCircle, Lightbulb, Sparkles, Star } from "lucide-react";
+import { ChevronLeft, HelpCircle } from "lucide-react";
 
 import { Keyboard } from "@/components/Keyboard";
 import { cn } from "@/lib/utils";
@@ -424,76 +424,35 @@ function PlayPageContent() {
           </button>
         </DialogTrigger>
         <DialogContent
-          className={cn(
-            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg)] px-6 pt-6 pb-[max(1rem,var(--safe-bottom))]",
-            theme.resultModal
-          )}
+          className="flex max-h-[min(85dvh,calc(var(--app-height,100dvh)-2rem))] w-[min(calc(100vw-1.5rem),26rem)] flex-col overflow-hidden border-slate-200/60 bg-[var(--app-bg)] px-4 pt-5 pb-[max(1.25rem,var(--safe-bottom-fill))] shadow-[0_8px_30px_rgba(0,0,0,0.08)] [&[data-slot=dialog-content]]:rounded-2xl"
         >
-          <DialogHeader className="shrink-0 pb-2 pr-8 text-center">
-            <DialogTitle className="text-xl font-bold text-foreground">
+          <DialogHeader className="shrink-0 pb-3 pr-9 text-left">
+            <DialogTitle className="text-lg font-semibold text-foreground">
               How to Play
             </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Guess the secret word in {MAX_GUESSES} tries. Use the colors after each guess to steer your next one!
+            <DialogDescription className="mt-0.5 text-sm text-muted-foreground">
+              Guess the word. Colors help you decide what to try next.
             </DialogDescription>
           </DialogHeader>
-          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-2">
-            <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Sparkles className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-                The Goal
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Type a {wordLength}-letter word. Keep trying until every tile is in the perfect spot!
-              </p>
-            </section>
-
-            <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Lightbulb className="h-5 w-5 shrink-0 text-amber-500" aria-hidden />
-                Color Detective Guide
-              </h3>
-              <ul className="mt-3 grid gap-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white">
-                    😀
-                  </span>
-                  <span className="font-semibold text-emerald-700">
-                    Green = Perfect spot
-                  </span>
-                </li>
-                <li className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-400 text-xs font-bold text-white">
-                    😮
-                  </span>
-                  <span className="font-semibold text-amber-700">
-                    Yellow = Move me
-                  </span>
-                </li>
-                <li className="flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted-foreground/60 text-xs font-bold text-white">
-                    😴
-                  </span>
-                  <span className="font-semibold text-foreground">
-                    Gray = Not in word
-                  </span>
-                </li>
-              </ul>
-            </section>
-
-            <section className="rounded-2xl border border-border bg-white/80 p-4 shadow-sm">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-                <Star className="h-5 w-5 shrink-0 text-amber-500" aria-hidden />
-                Super Star Tips
-              </h3>
-              <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-muted-foreground">
-                <li>
-                  Start with different letters like <span className="font-semibold text-foreground">RAIN</span> or <span className="font-semibold text-foreground">BIRD</span>.
-                </li>
-                <li>Swipe the bar below the grid to find hints—they’re friendly clue cards.</li>
-                <li>If you’re stuck, peek at a hint or try swapping the letters around.</li>
-              </ul>
-            </section>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3 rounded-xl bg-emerald-50/80 px-3 py-2.5">
+              <span className="h-8 w-8 shrink-0 rounded-lg bg-emerald-500" aria-hidden />
+              <span className="text-sm font-medium text-emerald-800">
+                Green — Right letter, right spot
+              </span>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl bg-amber-50/80 px-3 py-2.5">
+              <span className="h-8 w-8 shrink-0 rounded-lg bg-amber-400" aria-hidden />
+              <span className="text-sm font-medium text-amber-800">
+                Yellow — Right letter, wrong spot
+              </span>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl bg-slate-100/80 px-3 py-2.5">
+              <span className="h-8 w-8 shrink-0 rounded-lg bg-slate-400" aria-hidden />
+              <span className="text-sm font-medium text-slate-700">
+                Gray — Not in the word
+              </span>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -699,10 +658,10 @@ function PlayPageContent() {
   }, [handleBackspace, handleLetter, handleSubmit]);
 
   return (
-    <main className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom))] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg)]">
+    <main className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom-fill))] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg)]">
       <div
         className="pointer-events-none absolute inset-0 -z-10"
-        style={{ bottom: "calc(-1 * var(--safe-bottom, 0px))", minHeight: "calc(100% + var(--safe-bottom, 0px))" }}
+        style={{ bottom: "calc(-1 * var(--safe-bottom-fill, 44px))", minHeight: "calc(100% + var(--safe-bottom-fill, 44px))" }}
       >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div

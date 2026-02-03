@@ -82,8 +82,8 @@ export default function ParentsPage() {
 
   return (
     <main
-      className="min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom))] bg-[var(--app-bg)] px-4 py-8 pt-[calc(var(--safe-top)+2rem)] sm:px-10 sm:py-12"
-      style={{ paddingBottom: "max(1.5rem, var(--safe-bottom))" }}
+      className="min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom-fill))] bg-[var(--app-bg)] px-4 py-8 pt-[calc(var(--safe-top)+2rem)] sm:px-10 sm:py-12"
+      style={{ paddingBottom: "max(1.5rem, var(--safe-bottom-fill))" }}
     >
       <div className="mx-auto max-w-xl space-y-8">
         {/* Header */}

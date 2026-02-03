@@ -41,8 +41,8 @@ function SheetOverlay({
         className
       )}
       style={{
-        bottom: "calc(-1 * var(--safe-bottom, 0px))",
-        minHeight: "calc(100dvh + var(--safe-bottom, 0px))",
+        bottom: "calc(-1 * var(--safe-bottom-fill, 44px))",
+        minHeight: "calc(100dvh + var(--safe-bottom-fill, 44px))",
         ...style,
       }}
       {...props}
@@ -62,8 +62,8 @@ function SheetContent({
   const bottomStyle =
     side === "bottom"
       ? {
-          bottom: "calc(-1 * var(--safe-bottom, 0px))",
-          paddingBottom: "max(1rem, var(--safe-bottom, 0px))",
+          bottom: "calc(-1 * var(--safe-bottom-fill, 44px))",
+          paddingBottom: "max(1rem, var(--safe-bottom-fill, 44px))",
         }
       : undefined;
   return (

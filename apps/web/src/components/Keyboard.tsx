@@ -10,9 +10,9 @@ const ROW1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
 const ROW2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
 const ROW3 = ["Z", "X", "C", "V", "B", "N", "M"];
 
-/* iOS-style rounded rectangles, subtle radius */
-const KEY_SIZE = "clamp(34px, 8vw, 50px)";
-const KEY_GAP = "5px";
+/* iOS-style rounded rectangles, subtle radius. Larger keys; gaps/padding trimmed so keyboard height stays same. */
+const KEY_SIZE = "clamp(40px, 9.5vw, 52px)";
+const KEY_GAP = "3px";
 const KEY_RADIUS = "6px";
 
 type KeyboardProps = {
@@ -49,7 +49,7 @@ function LetterKey({
         borderRadius: KEY_RADIUS,
       }}
       className={cn(
-        "flex shrink-0 items-center justify-center border font-semibold transition-transform duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(14px,3vw,17px)]",
+        "flex shrink-0 items-center justify-center border font-semibold transition-transform duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(15px,3.2vw,18px)]",
         !status &&
           "border-slate-300/80 bg-slate-100 text-slate-800 active:bg-slate-200",
         status === "correct" &&
@@ -112,8 +112,8 @@ export function Keyboard({
       style={{
         paddingLeft: "max(1.25rem, calc(env(safe-area-inset-left, 0px) + 1rem))",
         paddingRight: "max(1.25rem, calc(env(safe-area-inset-right, 0px) + 1rem))",
-        paddingTop: "8px",
-        paddingBottom: "max(12px, var(--safe-bottom, 0px))",
+        paddingTop: "2px",
+        paddingBottom: "max(6px, var(--safe-bottom-fill, 44px))",
       }}
     >
       <div

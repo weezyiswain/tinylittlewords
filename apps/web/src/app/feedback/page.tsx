@@ -127,8 +127,8 @@ export default function FeedbackPage() {
 
   return (
     <main
-      className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom))] flex-col overflow-y-auto px-4 py-8 pt-[calc(var(--safe-top)+2rem)] sm:px-10 sm:py-12"
-      style={{ paddingBottom: "max(1.5rem, var(--safe-bottom))" }}
+      className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom-fill))] flex-col overflow-y-auto px-4 py-8 pt-[calc(var(--safe-top)+2rem)] sm:px-10 sm:py-12"
+      style={{ paddingBottom: "max(1.5rem, var(--safe-bottom-fill))" }}
     >
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-24 left-[-12%] h-64 w-64 rounded-full bg-gradient-to-br from-teal-200/60 via-teal-100/40 to-transparent blur-3xl sm:h-72 sm:w-72" />

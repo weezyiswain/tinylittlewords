@@ -206,8 +206,8 @@ export default function Home() {
       <div
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
-          minHeight: "calc(var(--app-height, 100dvh) + var(--safe-bottom, 0px))",
-          bottom: "calc(-1 * var(--safe-bottom, 0px))",
+          minHeight: "calc(var(--app-height, 100dvh) + var(--safe-bottom-fill, 44px))",
+          bottom: "calc(-1 * var(--safe-bottom-fill, 44px))",
         }}
         aria-hidden
       >
@@ -236,7 +236,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom))] flex-col overflow-x-hidden bg-[var(--app-bg)]"
+        className="relative flex h-[var(--app-height,100dvh)] min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom-fill))] flex-col overflow-x-hidden bg-[var(--app-bg)]"
       >
       <Script
         id="home-structured-data"
@@ -247,10 +247,17 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="flex min-h-full w-full flex-col"
+        className="flex min-h-0 flex-1 flex-col"
       >
         {showLoading ? (
-          <div className="fixed inset-0 z-0 flex items-center justify-center px-4">
+          <div
+            className="fixed left-0 right-0 top-0 z-0 flex items-center justify-center px-4"
+            style={{
+              bottom: "calc(-1 * var(--safe-bottom-fill, 44px))",
+              minHeight: "calc(var(--app-height, 100dvh) + var(--safe-bottom-fill, 44px))",
+              backgroundColor: "var(--app-bg)",
+            }}
+          >
             <div className="flex flex-col items-center gap-6">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                 Tiny Little Words
@@ -281,7 +288,7 @@ export default function Home() {
             >
               <div
                 className="mx-auto max-w-xl space-y-2.5 px-4 pt-4 sm:space-y-3 sm:px-8 sm:pt-6"
-                style={{ paddingBottom: "max(1.5rem, var(--safe-bottom))" }}
+                style={{ paddingBottom: "max(1.5rem, var(--safe-bottom-fill))" }}
               >
               <section
                 className={cn(
@@ -396,8 +403,8 @@ export default function Home() {
               style={{
                 paddingLeft: "max(1rem, var(--safe-left))",
                 paddingRight: "max(1rem, var(--safe-right))",
-                paddingTop: "1rem",
-                paddingBottom: "max(20px, var(--safe-bottom))",
+                paddingTop: "0.75rem",
+                paddingBottom: "max(1.25rem, var(--safe-bottom-fill))",
               }}
             >
               <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
