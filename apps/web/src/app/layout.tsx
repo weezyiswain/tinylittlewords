@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { canonicalUrl, seoConfig } from "@/lib/seo";
 import { MobileLayoutDebug } from "@/components/MobileLayoutDebug";
+import { ViewportHeight } from "@/components/ViewportHeight";
 
 export const metadata: Metadata = {
   metadataBase: new URL(seoConfig.siteUrl),
@@ -69,6 +70,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className="relative h-full font-sans antialiased">
+        <ViewportHeight />
         {children}
         <MobileLayoutDebug />
       </body>

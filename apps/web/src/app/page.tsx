@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { motion } from "framer-motion";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, UsersRound } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { AVATAR_OPTIONS, getRandomAvatar } from "@/lib/avatars";
@@ -15,10 +15,10 @@ import { canonicalUrl, seoConfig } from "@/lib/seo";
 import { WordPackSelect } from "@/components/word-pack-select";
 
 const WORD_LENGTH_OPTIONS = [3, 4, 5] as const;
-const AGE_SHORT_COPY: Record<(typeof WORD_LENGTH_OPTIONS)[number], string> = {
-  3: "Ages 5-6",
-  4: "Ages 6-7",
-  5: "Ages 8+",
+const LENGTH_LABEL: Record<(typeof WORD_LENGTH_OPTIONS)[number], string> = {
+  3: "Build confidence",
+  4: "Find your flow",
+  5: "Grow skills",
 };
 
 type Pack = {
@@ -204,8 +204,11 @@ export default function Home() {
   return (
     <>
       <div
-        className="pointer-events-none fixed inset-0 -z-10 min-h-[100dvh]"
-        style={{ bottom: "calc(-1 * var(--safe-bottom, 0px))" }}
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          minHeight: "var(--app-height, 100dvh)",
+          bottom: "calc(-1 * var(--safe-bottom, 0px))",
+        }}
         aria-hidden
       >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
@@ -233,7 +236,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-[var(--app-bg,#fafafa)]"
+        className="relative flex min-h-[var(--app-height,100dvh)] flex-col overflow-x-hidden bg-[var(--app-bg)]"
       >
       <Script
         id="home-structured-data"
@@ -273,7 +276,7 @@ export default function Home() {
             </header>
 
             <div
-              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-contain bg-[var(--app-bg,#fafafa)]"
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-contain bg-[var(--app-bg)]"
               style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
             >
               <div
@@ -301,7 +304,7 @@ export default function Home() {
                       onClick={() => setSelectedLength(lengthOption)}
                       role="radio"
                       aria-checked={lengthOption === selectedLength}
-                      aria-label={`${lengthOption}-letter words (${AGE_SHORT_COPY[lengthOption]})`}
+                      aria-label={`${lengthOption}-letter words (${LENGTH_LABEL[lengthOption]})`}
                       className={cn(
                         "flex h-16 flex-col items-center justify-center rounded-xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-[4.5rem]",
                         theme.wordLengthBase,
@@ -314,7 +317,7 @@ export default function Home() {
                     >
                       <span className="text-xl font-bold sm:text-2xl">{lengthOption}</span>
                       <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
-                        {AGE_SHORT_COPY[lengthOption]}
+                        {LENGTH_LABEL[lengthOption]}
                       </span>
                     </button>
                   ))}
@@ -401,23 +404,6 @@ export default function Home() {
               }}
             >
               <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
-                {/* For parents discovery row - flat inline, above CTA */}
-                <Link
-                  href="/parents"
-                  className="group flex w-full items-center justify-between gap-3 border-t border-black/[0.06] pt-4 transition active:scale-[0.98] active:opacity-90"
-                  aria-label="Learn more for parents"
-                >
-                  <span className="flex items-center gap-2 text-sm text-neutral-600">
-                    <span className="text-base" aria-hidden>✨</span>
-                    <span>Built for kids, shaped by parents. Learn more</span>
-                  </span>
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-neutral-900/[0.04] text-neutral-500 transition group-hover:bg-neutral-900/[0.06] group-hover:text-neutral-700"
-                    aria-hidden
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </span>
-                </Link>
                 <motion.button
                   type="button"
                   onClick={handleStart}
@@ -431,6 +417,23 @@ export default function Home() {
                 >
                   Start playing
                 </motion.button>
+                {/* For parents discovery row - below CTA */}
+                <Link
+                  href="/parents"
+                  className="group flex w-full items-center justify-between gap-3 pt-1 transition active:scale-[0.98] active:opacity-90"
+                  aria-label="Learn more for parents"
+                >
+                  <span className="flex items-center gap-2 text-sm text-neutral-600">
+                    <UsersRound className="h-4 w-4 shrink-0 text-neutral-500" aria-hidden />
+                    <span>Built for kids, shaped by parents. Learn more</span>
+                  </span>
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-neutral-900/[0.04] text-neutral-500 transition group-hover:bg-neutral-900/[0.06] group-hover:text-neutral-700"
+                    aria-hidden
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </span>
+                </Link>
               </div>
             </footer>
           </>

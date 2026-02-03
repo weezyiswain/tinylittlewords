@@ -425,7 +425,7 @@ function PlayPageContent() {
         </DialogTrigger>
         <DialogContent
           className={cn(
-            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg,#fafafa)] px-6 pt-6 pb-[max(1rem,var(--safe-bottom))]",
+            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg)] px-6 pt-6 pb-[max(1rem,var(--safe-bottom))]",
             theme.resultModal
           )}
         >
@@ -699,7 +699,7 @@ function PlayPageContent() {
   }, [handleBackspace, handleLetter, handleSubmit]);
 
   return (
-    <main className="relative flex min-h-[100dvh] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg,#fafafa)]">
+    <main className="relative flex min-h-[var(--app-height,100dvh)] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg)]">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div

@@ -33,7 +33,7 @@ function AuthCallbackContent() {
   }, [router, searchParams]);
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-4">
+    <main className="flex min-h-[var(--app-height,100dvh)] flex-col items-center justify-center px-4">
       {status === "exchanging" && (
         <p className="text-muted-foreground">Signing you in…</p>
       )}
@@ -48,7 +48,7 @@ function AuthCallbackContent() {
 
 export default function AuthCallbackPage() {
   return (
-    <Suspense fallback={<main className="flex min-h-dvh flex-col items-center justify-center px-4"><p className="text-muted-foreground">Loading…</p></main>}>
+    <Suspense fallback={<main className="flex min-h-[var(--app-height,100dvh)] flex-col items-center justify-center px-4"><p className="text-muted-foreground">Loading…</p></main>}>
       <AuthCallbackContent />
     </Suspense>
   );

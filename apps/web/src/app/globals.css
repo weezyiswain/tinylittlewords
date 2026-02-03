@@ -44,6 +44,9 @@
 }
 
 :root {
+  /* Fallback for iOS PWA: JS sets --app-height to window.innerHeight on load/resize/orientationchange.
+     Use with min-height: var(--app-height, 100dvh) so 100dvh works when dvh is supported. */
+  --app-height: 100dvh;
   /* Safe area insets - reuse across app for iOS PWA */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -129,7 +132,7 @@
   html {
     height: 100%;
     min-height: -webkit-fill-available;
-    min-height: 100dvh;
+    min-height: var(--app-height, 100dvh);
     background-color: var(--app-bg);
     overscroll-behavior-y: none;
     overscroll-behavior-x: contain;
@@ -152,10 +155,10 @@
     overflow-x: hidden;
     min-height: 100%;
     min-height: -webkit-fill-available;
-    min-height: 100dvh;
+    min-height: var(--app-height, 100dvh);
     position: relative;
   }
-  /* Paint bottom safe area to prevent white strip on iOS PWA */
+  /* Extend background into bottom safe area - prevents white strip on iOS PWA */
   body::after {
     content: "";
     position: fixed;

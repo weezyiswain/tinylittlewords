@@ -15,7 +15,7 @@ export default function Error({ error, reset }: ErrorProps) {
 
   return (
     <main
-      className="flex min-h-dvh flex-col items-center justify-center bg-neutral-50 px-6 py-12 text-center"
+      className="flex min-h-[var(--app-height,100dvh)] flex-col items-center justify-center bg-[var(--app-bg)] px-6 py-12 text-center"
       style={{ paddingBottom: "max(1.5rem, var(--safe-bottom))" }}
     >
       <div className="rounded-2xl border border-neutral-200 bg-white px-6 py-8 shadow-sm max-w-md">
