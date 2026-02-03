@@ -10,8 +10,8 @@ const ROW1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
 const ROW2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
 const ROW3 = ["Z", "X", "C", "V", "B", "N", "M"];
 
-/* iOS-like keyboard: keyHeight 48px (clamp 44–52), keyRadius 14–16px, keyGap 6–8px */
-const KEY_SIZE = "clamp(40px, 8.5vw, 48px)";
+/* Keys scale down on narrow screens to prevent horizontal overflow */
+const KEY_SIZE = "clamp(28px, 7.5vw, 48px)";
 const KEY_GAP = "6px";
 const KEY_RADIUS = "14px";
 
@@ -111,14 +111,14 @@ export function Keyboard({
     <div
       className="box-border w-full min-w-0 overflow-x-hidden bg-transparent"
       style={{
-        paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
-        paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
+        paddingLeft: "max(1.25rem, calc(env(safe-area-inset-left, 0px) + 1rem))",
+        paddingRight: "max(1.25rem, calc(env(safe-area-inset-right, 0px) + 1rem))",
         paddingTop: "8px",
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
       }}
     >
       <div
-        className="mx-auto box-border flex w-full max-w-[min(520px,calc(100vw-2rem))] min-w-0 flex-col items-center"
+        className="mx-auto box-border flex w-full max-w-[min(460px,calc(100vw-3rem))] min-w-0 flex-col items-center justify-center"
         style={{ gap: KEY_GAP }}
       >
         {/* Row 1: QWERTYUIOP - 10 keys */}

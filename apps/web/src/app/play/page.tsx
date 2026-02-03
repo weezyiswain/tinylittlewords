@@ -494,20 +494,10 @@ function PlayPageContent() {
   const hintButtonHighlight = shouldHighlightHints && !isHintSheetOpen && hasHintAvailable;
   const renderHintHelp = (
     buttonClassName?: string,
-    variant: "default" | "muted" = "default"
+    _variant: "default" | "muted" = "default"
   ) => {
     const baseClasses =
-      variant === "muted"
-        ? cn(
-            "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-            theme.backButton
-          )
-        : cn(
-            "flex h-11 w-11 items-center justify-center rounded-full border border-transparent bg-gradient-to-br text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-            `bg-gradient-to-br ${theme.ctaGradient}`,
-            theme.ctaShadow,
-            theme.ctaShadowHover
-          );
+      "inline-flex h-11 min-h-[44px] min-w-[44px] w-11 shrink-0 items-center justify-center rounded-full bg-transparent text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2";
     return (
       <Dialog>
         <DialogTrigger asChild>
@@ -516,7 +506,7 @@ function PlayPageContent() {
             className={cn(baseClasses, buttonClassName)}
             aria-label="How to play"
           >
-            <HelpCircle className="h-5 w-5" aria-hidden />
+            <HelpCircle className="h-6 w-6" aria-hidden />
           </button>
         </DialogTrigger>
         <DialogContent
@@ -872,13 +862,10 @@ function PlayPageContent() {
       >
         <Link
           href="/"
-          className={cn(
-            "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-            theme.backButton
-          )}
+          className="inline-flex h-11 min-h-[44px] min-w-[44px] w-11 shrink-0 items-center justify-center rounded-full bg-transparent text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2"
           aria-label="Back to puzzles"
         >
-          <ChevronLeft className="h-5 w-5" aria-hidden />
+          <ChevronLeft className="h-6 w-6" aria-hidden />
         </Link>
 
         <motion.div
