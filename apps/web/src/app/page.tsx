@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { motion } from "framer-motion";
 
+import { ChevronRight } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { AVATAR_OPTIONS, getRandomAvatar } from "@/lib/avatars";
 import { getBuddyTheme } from "@/lib/buddy-themes";
@@ -203,6 +205,7 @@ export default function Home() {
     <>
       <div
         className="pointer-events-none fixed inset-0 -z-10 min-h-[100dvh]"
+        style={{ bottom: "calc(-1 * var(--safe-bottom, 0px))" }}
         aria-hidden
       >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
@@ -230,7 +233,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[var(--app-bg,#fafafa)]"
+        className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-[var(--app-bg,#fafafa)]"
       >
       <Script
         id="home-structured-data"
@@ -273,7 +276,10 @@ export default function Home() {
               className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-contain bg-[var(--app-bg,#fafafa)]"
               style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
             >
-              <div className="mx-auto max-w-xl space-y-2.5 px-4 py-4 sm:space-y-3 sm:px-8 sm:py-6">
+              <div
+                className="mx-auto max-w-xl space-y-2.5 px-4 pt-4 sm:space-y-3 sm:px-8 sm:pt-6"
+                style={{ paddingBottom: "max(1.5rem, var(--safe-bottom))" }}
+              >
               <section
                 className={cn(
                   "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4",
@@ -386,21 +392,38 @@ export default function Home() {
             </div>
 
             <footer
-              className="shrink-0 w-full border-t border-white/60 bg-white/80 backdrop-blur"
+              className="mt-auto shrink-0 w-full bg-transparent"
               style={{
-                paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
-                paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
+                paddingLeft: "max(1rem, var(--safe-left))",
+                paddingRight: "max(1rem, var(--safe-right))",
                 paddingTop: "1rem",
-                paddingBottom: "12px",
+                paddingBottom: "max(20px, var(--safe-bottom))",
               }}
             >
-              <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-3">
+              <div className="mx-auto flex w-full max-w-xl flex-col gap-4">
+                {/* For parents discovery row - flat inline, above CTA */}
+                <Link
+                  href="/parents"
+                  className="group flex w-full items-center justify-between gap-3 border-t border-black/[0.06] pt-4 transition active:scale-[0.98] active:opacity-90"
+                  aria-label="Learn more for parents"
+                >
+                  <span className="flex items-center gap-2 text-sm text-neutral-600">
+                    <span className="text-base" aria-hidden>✨</span>
+                    <span>Built for kids, shaped by parents. Learn more</span>
+                  </span>
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200/80 bg-neutral-900/[0.04] text-neutral-500 transition group-hover:bg-neutral-900/[0.06] group-hover:text-neutral-700"
+                    aria-hidden
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </span>
+                </Link>
                 <motion.button
                   type="button"
                   onClick={handleStart}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "w-full max-w-md rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "w-full rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     theme.ctaGradient,
                     theme.ctaShadow,
                     theme.ctaShadowHover
@@ -408,12 +431,6 @@ export default function Home() {
                 >
                   Start playing
                 </motion.button>
-                <Link
-                  href="/parents"
-                  className="inline-flex items-center justify-center rounded-full border-2 border-neutral-300 bg-transparent px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-neutral-400 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
-                >
-                  For parents
-                </Link>
               </div>
             </footer>
           </>

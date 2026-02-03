@@ -44,6 +44,11 @@
 }
 
 :root {
+  /* Safe area insets - reuse across app for iOS PWA */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
   /* App background - use everywhere to prevent white bar on iOS */
   --app-bg: #fafafa;
   --font-geist-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -132,6 +137,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
+    margin: 0;
     @apply bg-background text-foreground;
     /* Match app gradient bottom (#fafafa) so any bottom strip on home/play doesn’t show contrasting white */
     background-color: var(--app-bg);
@@ -148,6 +154,18 @@
     min-height: -webkit-fill-available;
     min-height: 100dvh;
     position: relative;
+  }
+  /* Paint bottom safe area to prevent white strip on iOS PWA */
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--safe-bottom);
+    background-color: var(--app-bg);
+    pointer-events: none;
+    z-index: -1;
   }
 }
 

@@ -137,8 +137,8 @@ function PlayPageContent() {
   const boardContainerStyle = useMemo(
     () =>
       ({
-        "--tile-size": "clamp(52px, 12vw, 72px)",
-        "--tile-gap": "clamp(8px, 1.8vw, 12px)",
+        "--tile-size": "clamp(52px, min(13vw, 11vh), 72px)",
+        "--tile-gap": "clamp(6px, 1.5vw, 10px)",
         width: "100%",
         maxWidth: `calc(var(--tile-size) * ${wordLength} + var(--tile-gap) * ${Math.max(
           0,
@@ -193,12 +193,12 @@ function PlayPageContent() {
   const [invalidWordShake, setInvalidWordShake] = useState(false);
   const [lastEvaluatedRowIndex, setLastEvaluatedRowIndex] = useState<number | null>(null);
   const [buddyAnimation, setBuddyAnimation] = useState<boolean>(false);
-  const [statsForCarousel, setStatsForCarousel] = useState({ winsToday: 0, streak: 0 });
+  const [statsForCarousel, setStatsForCarousel] = useState({ winsToday: 0, streak: 0, totalGames: 0 });
   const recordedForRoundRef = useRef(false);
 
   useEffect(() => {
     const s = getStats();
-    setStatsForCarousel({ winsToday: s.winsToday, streak: s.streak });
+    setStatsForCarousel({ winsToday: s.winsToday, streak: s.streak, totalGames: s.totalGames });
   }, [statsRefresh]);
 
   const targetWord = currentPuzzle?.word ?? "";
@@ -425,7 +425,7 @@ function PlayPageContent() {
         </DialogTrigger>
         <DialogContent
           className={cn(
-            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg,#fafafa)] px-6 pt-6 pb-4",
+            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[var(--app-bg,#fafafa)] px-6 pt-6 pb-[max(1rem,var(--safe-bottom))]",
             theme.resultModal
           )}
         >
@@ -743,8 +743,8 @@ function PlayPageContent() {
           animate={
             buddyAnimation
               ? {
-                  scale: [1, 1.1, 1.05, 1],
-                  transition: { duration: 0.35, ease: "easeOut" },
+                  scale: [1, 1.08, 1.02, 1],
+                  transition: { duration: 0.3, ease: "easeOut" },
                 }
               : undefined
           }
@@ -970,6 +970,7 @@ function PlayPageContent() {
         highlightHintSlide={hintButtonHighlight}
         winsToday={statsForCarousel.winsToday}
         streak={statsForCarousel.streak}
+        totalGames={statsForCarousel.totalGames}
         statsRefresh={statsRefresh}
       />
 
