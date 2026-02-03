@@ -19,8 +19,9 @@ type KeyboardProps = {
 };
 
 const keyBase =
-  "flex min-h-[44px] items-center justify-center rounded-lg border-0 text-base font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation";
+  "flex min-h-[44px] min-w-0 items-center justify-center rounded-lg border-0 font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation";
 const keyHeight = "h-[clamp(44px,7vh,56px)]";
+const keyFont = "text-[clamp(14px,3.2vw,18px)]";
 
 function LetterKey({
   letter,
@@ -41,6 +42,7 @@ function LetterKey({
       className={cn(
         keyBase,
         keyHeight,
+        keyFont,
         !status &&
           "bg-[#d1d5db] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.8)_inset,0_2px_0_0_rgba(0,0,0,0.1)] active:bg-[#c4c8cc]",
         status === "correct" &&
@@ -78,6 +80,7 @@ function ActionKey({
       className={cn(
         keyBase,
         keyHeight,
+        keyFont,
         "bg-[#9ca3af] text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] active:bg-[#8b92a0]",
         className
       )}
@@ -105,11 +108,11 @@ export function Keyboard({
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
       }}
     >
-      <div className="mx-auto w-full max-w-[520px] px-4">
-        <div className="grid grid-cols-1 gap-1.5">
+      <div className="mx-auto w-full max-w-[560px] px-4 sm:px-5">
+        <div className="grid grid-cols-1 gap-2">
           {/* Row 1: QWERTYUIOP - 10 columns */}
           <div
-            className="grid gap-1.5"
+            className="grid gap-2"
             style={{ gridTemplateColumns: "repeat(10, 1fr)" }}
           >
             {ROW1.map((letter) => (
@@ -125,7 +128,7 @@ export function Keyboard({
 
           {/* Row 2: ASDFGHJKL - 9 keys centered with side gutters */}
           <div
-            className="grid gap-1.5"
+            className="grid gap-2"
             style={{
               gridTemplateColumns: "minmax(0,0.5fr) repeat(9, 1fr) minmax(0,0.5fr)",
             }}
@@ -145,7 +148,7 @@ export function Keyboard({
 
           {/* Row 3: Enter + ZXCVBNM + Backspace */}
           <div
-            className="grid gap-1.5"
+            className="grid gap-2"
             style={{
               gridTemplateColumns: "1.5fr repeat(7, 1fr) 1.5fr",
             }}

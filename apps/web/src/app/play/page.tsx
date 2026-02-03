@@ -57,62 +57,12 @@ const STATUS_PRIORITY: Record<LetterStatus, number> = {
 
 const SUPPORTED_LENGTHS = [3, 4, 5] as const;
 
-type StatusTone = "info" | "error" | "success" | "warning" | "encouragement";
-
-type StatusSpeaker = Pick<AvatarOption, "id" | "name" | "emoji" | "bg">;
+type StatusTone = "info" | "error" | "success" | "warning";
 
 type StatusMessage = {
   text: string;
   tone: StatusTone;
-  speaker?: StatusSpeaker;
 };
-
-const ENCOURAGEMENT_MESSAGES: Record<string, string> = {
-  bear: "Brave Bear rumbles: keep roaring through those letters!",
-  dog: "Daring Dog barks: keep sniffing out that word!",
-  fox: "Swift Fox grins: keep darting toward the answer!",
-  owl: "Wise Owl hoots: keep those clever guesses coming!",
-  panda: "Playful Panda claps: keep the giggles and guesses going!",
-  "lovey-cat": "Lovey the Cat purrs: keep guessing—you're paws-itively close!",
-};
-
-const ENCOURAGEMENT_ACCENTS: Record<
-  string,
-  { border: string; message: string }
-> = {
-  bear: { border: "border-amber-300", message: "text-amber-900" },
-  dog: { border: "border-blue-300", message: "text-blue-900" },
-  fox: { border: "border-orange-300", message: "text-orange-900" },
-  owl: { border: "border-purple-300", message: "text-purple-900" },
-  panda: { border: "border-emerald-300", message: "text-emerald-900" },
-  "lovey-cat": { border: "border-pink-300", message: "text-pink-900" },
-};
-
-const STATUS_TONE_STYLES: Record<StatusTone, string> = {
-  info: "border-border bg-white/90 text-foreground",
-  error: "border-red-300 bg-red-50 text-red-900",
-  success: "border-emerald-300 bg-emerald-50 text-emerald-900",
-  warning: "border-amber-300 bg-amber-50 text-amber-900",
-  encouragement: "",
-};
-
-function getEncouragementMessage(avatar: AvatarOption): string {
-  return (
-    ENCOURAGEMENT_MESSAGES[avatar.id] ?? "Your buddy cheers: keep guessing!"
-  );
-}
-
-function getEncouragementAccent(avatar?: StatusSpeaker) {
-  if (!avatar) {
-    return { border: "border-primary/40", message: "text-primary-900" };
-  }
-  return (
-    ENCOURAGEMENT_ACCENTS[avatar.id] ?? {
-      border: "border-primary/40",
-      message: "text-primary-900",
-    }
-  );
-}
 
 function buildHints(word: string): string[] {
   const upper = word.toUpperCase();
@@ -280,8 +230,8 @@ function PlayPageContent() {
   const boardContainerStyle = useMemo(
     () =>
       ({
-        "--tile-size": "clamp(44px, 10.5vw, 60px)",
-        "--tile-gap": "clamp(8px, 1.8vw, 14px)",
+        "--tile-size": "clamp(44px, 10vw, 60px)",
+        "--tile-gap": "clamp(6px, 1.5vw, 10px)",
         width: "100%",
         maxWidth: `calc(var(--tile-size) * ${wordLength} + var(--tile-gap) * ${Math.max(
           0,
@@ -332,8 +282,9 @@ function PlayPageContent() {
   const [hasRetried, setHasRetried] = useState(false);
   const [showRetryPrompt, setShowRetryPrompt] = useState(false);
   const [isCheckingWord, setIsCheckingWord] = useState(false);
-  const [isMessageFlipped, setIsMessageFlipped] = useState(false);
   const [statsRefresh, setStatsRefresh] = useState(0);
+  const [invalidWordShake, setInvalidWordShake] = useState(false);
+  const [lastEvaluatedRowIndex, setLastEvaluatedRowIndex] = useState<number | null>(null);
   const recordedForRoundRef = useRef(false);
 
   const targetWord = currentPuzzle?.word ?? "";
@@ -521,6 +472,8 @@ function PlayPageContent() {
     setRevealedHints(Array(activeHints.length).fill(false));
     setHasRetried(false);
     setShowRetryPrompt(false);
+    setLastEvaluatedRowIndex(null);
+    setInvalidWordShake(false);
     recordedForRoundRef.current = false;
   }, [currentPuzzle, activeHints.length]);
 
@@ -537,22 +490,7 @@ function PlayPageContent() {
   const shouldHighlightHints =
     (isFinalChanceWithHint || (showRetryPrompt && hasHintAvailable)) &&
     !isSolved;
-  const shouldFlipMessage =
-    statusMessage?.tone === "success" || statusMessage?.tone === "encouragement";
-  const encouragementAccent = getEncouragementAccent(statusMessage?.speaker);
   const hintButtonHighlight = shouldHighlightHints && !isHintSheetOpen && hasHintAvailable;
-  useEffect(() => {
-    if (!shouldFlipMessage || !statusMessage) {
-      setIsMessageFlipped(false);
-      return;
-    }
-    setIsMessageFlipped(true);
-    const timeout = window.setTimeout(() => {
-      setIsMessageFlipped(false);
-      setStatusMessage(null);
-    }, 4000);
-    return () => window.clearTimeout(timeout);
-  }, [shouldFlipMessage, statusMessage]);
   const renderHintHelp = (
     buttonClassName?: string,
     variant: "default" | "muted" = "default"
@@ -745,42 +683,46 @@ function PlayPageContent() {
     if (!currentPuzzle || isCheckingWord) return;
     if (isGameOver) {
       setStatusMessage({
-        text: "Great job! Head home to try a new word.",
+        text: "Nice! Head home to try a new word.",
         tone: "success",
       });
       return;
     }
     if (currentGuess.length !== wordLength) {
       setStatusMessage({
-        text: "That's not a real word yet. Tap erase and try again.",
+        text: "Finish the word first!",
         tone: "warning",
       });
+      setInvalidWordShake(true);
+      setTimeout(() => setInvalidWordShake(false), 400);
       return;
     }
 
     setIsCheckingWord(true);
-    setStatusMessage({
-      text: "Checking that word...",
-      tone: "info",
-    });
+    setStatusMessage(null);
 
     try {
       const isRealWord = await isValidWord(wordLength, currentGuess);
 
       if (!isRealWord) {
         setStatusMessage({
-          text: "That's not a real word. Tap erase and try again.",
+          text: "Not a word—try again!",
           tone: "error",
         });
+        setInvalidWordShake(true);
+        setTimeout(() => setInvalidWordShake(false), 400);
         return;
       }
 
       const evaluation = evaluateGuess(currentGuess, targetWord);
+      const evaluatedRowIndex = guesses.length;
 
       setGuesses((prev) => [...prev, currentGuess]);
       setResults((prev) => [...prev, evaluation]);
       updateKeyboard(currentGuess, evaluation);
       setCurrentGuess("");
+      setLastEvaluatedRowIndex(evaluatedRowIndex);
+      setTimeout(() => setLastEvaluatedRowIndex(null), 400);
 
       const nextIsSolved = currentGuess === targetWord;
       const nextGuessCount = guesses.length + 1;
@@ -791,10 +733,7 @@ function PlayPageContent() {
           recordGame(true);
           setStatsRefresh((n) => n + 1);
         }
-        setStatusMessage({
-          text: "You solved it! High fives all around!",
-          tone: "success",
-        });
+        setStatusMessage({ text: "You did it!", tone: "success" });
         setShowRetryPrompt(false);
       } else if (nextGuessCount >= allowedGuesses) {
         if (hasRetried && !recordedForRoundRef.current) {
@@ -802,23 +741,16 @@ function PlayPageContent() {
           recordGame(false);
           setStatsRefresh((n) => n + 1);
         }
-        const baseMessage = `Nice try! The word was ${targetWord}.`;
+        const baseMessage = `The word was ${targetWord}.`;
         const hintReminder =
           !hasRetried && hasHintAvailable
-            ? " You still have a hint waiting if you want another go."
+            ? " You still have a hint for another try!"
             : "";
-
         setStatusMessage({
           text: `${baseMessage}${hintReminder}`,
           tone: "warning",
         });
         setShowRetryPrompt(!hasRetried);
-      } else {
-        setStatusMessage({
-          text: getEncouragementMessage(avatar),
-          tone: "encouragement",
-          speaker: avatar,
-        });
       }
     } finally {
       setIsCheckingWord(false);
@@ -835,7 +767,6 @@ function PlayPageContent() {
     targetWord,
     updateKeyboard,
     wordLength,
-    avatar,
   ]);
 
   const handleRetryRound = useCallback(() => {
@@ -939,96 +870,32 @@ function PlayPageContent() {
             <ChevronLeft className="h-5 w-5" aria-hidden />
           </Link>
 
-          <motion.div
-            animate={{ rotateY: isMessageFlipped ? 180 : 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            style={{ transformStyle: "preserve-3d" }}
-            className="relative flex min-h-[56px] flex-1 items-stretch"
+          <div
+            className={cn(
+              "flex min-h-[52px] w-full items-center gap-3 rounded-full border border-white/70 bg-white/85 px-4 py-2.5 backdrop-blur",
+              theme.statusCard
+            )}
+            aria-live="polite"
+            role="status"
           >
             <div
               className={cn(
-                "flex w-full items-center gap-3 rounded-full border border-white/70 bg-white/85 px-4 py-2.5 backdrop-blur",
-                theme.statusCard
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl shadow-[0_6px_14px_rgba(0,0,0,0.1)]",
+                avatar.bg
               )}
-              style={{ backfaceVisibility: "hidden" }}
-              aria-live="polite"
-              role="status"
+              aria-hidden
             >
-              <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-full text-2xl shadow-[0_8px_18px_rgba(0,0,0,0.1)]",
-                    avatar.bg
-                  )}
-                  aria-hidden
-                >
-                  {avatar.emoji}
-                </div>
-                <div>
-                  <p className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
-                    Playing with
-                  </p>
-                  <p className="text-sm font-semibold text-foreground">
-                    Your buddy
-                  </p>
-                </div>
-              </div>
+              {avatar.emoji}
             </div>
-
-            <div
-              className={cn(
-                "absolute inset-0 flex flex-col justify-center rounded-full border px-4 py-2.5 backdrop-blur",
-                statusMessage?.tone === "encouragement" && statusMessage?.speaker
-                  ? theme.statusCardFlip
-                  : statusMessage?.tone === "success"
-                  ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_45px_rgba(16,185,129,0.2)]"
-                  : cn("border-white/70 bg-white/90", theme.statusCard)
-              )}
-              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-            >
-              {statusMessage?.tone === "encouragement" && statusMessage?.speaker ? (
-                <div className="flex items-center gap-3">
-                  <span
-                    className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-2xl",
-                      theme.keyBase
-                    )}
-                  >
-                    {statusMessage.speaker.emoji}
-                  </span>
-                  <div className="flex flex-col">
-                    <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground/70">
-                      Your buddy says
-                    </span>
-                    <span
-                      className={cn(
-                        "mt-1 text-sm font-semibold leading-snug sm:text-base",
-                        encouragementAccent.message
-                      )}
-                    >
-                      {statusMessage.text}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-start justify-center gap-1">
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                    Message
-                  </p>
-                  <p
-                    className={cn(
-                      "text-base font-semibold leading-snug sm:text-lg",
-                      statusMessage?.tone === "success"
-                        ? "text-emerald-900"
-                        : "text-foreground"
-                    )}
-                  >
-                    {statusMessage?.text ?? "You're doing great!"}
-                  </p>
-                </div>
-              )}
+            <div>
+              <p className="text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Playing with
+              </p>
+              <p className="text-sm font-semibold text-foreground">
+                Your buddy
+              </p>
             </div>
-          </motion.div>
+          </div>
 
           <div className="flex items-center justify-end gap-2">
             {renderHintAccess()}
@@ -1063,24 +930,39 @@ function PlayPageContent() {
                       const evaluation = results[rowIndex];
                       const isCurrentRow =
                         rowIndex === guesses.length && !isGameOver;
+                      const shouldShake =
+                        invalidWordShake && isCurrentRow;
+                      const isJustEvaluated =
+                        lastEvaluatedRowIndex === rowIndex && evaluation;
 
                       const display = isCurrentRow ? currentGuess : guess;
 
                       return (
-                        <div
+                        <motion.div
                           key={`row-${rowIndex}`}
                           className="grid"
                           style={boardRowStyle}
+                          animate={
+                            shouldShake
+                              ? {
+                                  x: [0, -8, 8, -8, 8, 0],
+                                  transition: {
+                                    duration: 0.25,
+                                    ease: "easeOut",
+                                  },
+                                }
+                              : undefined
+                          }
                         >
                           {Array.from({ length: wordLength }).map((_, letterIndex) => {
                             const letter = display[letterIndex];
                             const status = evaluation?.[letterIndex];
 
                             return (
-                              <div
+                              <motion.div
                                 key={`row-${rowIndex}-cell-${letterIndex}`}
                                 className={cn(
-                                  "flex aspect-square min-h-0 w-full items-center justify-center rounded border text-sm font-bold uppercase transition sm:text-base",
+                                  "flex aspect-square min-h-0 w-full items-center justify-center rounded border text-sm font-bold uppercase sm:text-base",
                                   status === "correct" &&
                                     "border-emerald-500 bg-emerald-500 text-white",
                                   status === "present" &&
@@ -1093,12 +975,41 @@ function PlayPageContent() {
                                   !letter &&
                                     "border-border bg-background text-muted-foreground/40"
                                 )}
+                                initial={false}
+                                animate={
+                                  isJustEvaluated && status
+                                    ? status === "correct"
+                                      ? {
+                                          scale: [1, 1.15, 1],
+                                          transition: {
+                                            duration: 0.2,
+                                            delay: letterIndex * 0.03,
+                                          },
+                                        }
+                                      : status === "present"
+                                      ? {
+                                          scale: [1, 1.08, 1],
+                                          rotate: [0, -3, 3, 0],
+                                          transition: {
+                                            duration: 0.2,
+                                            delay: letterIndex * 0.03,
+                                          },
+                                        }
+                                      : {
+                                          scale: [1, 1.08, 1],
+                                          transition: {
+                                            duration: 0.18,
+                                            delay: letterIndex * 0.03,
+                                          },
+                                        }
+                                    : undefined
+                                }
                               >
                                 {letter ?? ""}
-                              </div>
+                              </motion.div>
                             );
                           })}
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>
@@ -1106,43 +1017,18 @@ function PlayPageContent() {
               </div>
 
               <div className="space-y-3 overflow-y-auto pb-1">
-                {statusMessage && !shouldFlipMessage && (
-                  statusMessage.tone === "encouragement" && statusMessage.speaker ? (
-                    <div
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm shadow-md",
-                        statusMessage.speaker.bg,
-                        encouragementAccent.border
-                      )}
-                    >
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-2xl">
-                        {statusMessage.speaker.emoji}
-                      </span>
-                      <div className="flex flex-col">
-                        <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground/70">
-                          Your buddy says
-                        </span>
-                        <span
-                          className={cn(
-                            "mt-1 text-sm font-semibold leading-snug sm:text-base",
-                            encouragementAccent.message
-                          )}
-                        >
-                          {statusMessage.text}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className={cn(
-                        "rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
-                        STATUS_TONE_STYLES[statusMessage.tone] ??
-                          STATUS_TONE_STYLES.info
-                      )}
-                    >
-                      {statusMessage.text}
-                    </div>
-                  )
+                {statusMessage && (
+                  <p
+                    className={cn(
+                      "text-center text-sm font-medium",
+                      statusMessage.tone === "error" && "text-red-600",
+                      statusMessage.tone === "warning" && "text-amber-700",
+                      statusMessage.tone === "success" && "text-emerald-600",
+                      statusMessage.tone === "info" && "text-muted-foreground"
+                    )}
+                  >
+                    {statusMessage.text}
+                  </p>
                 )}
 
                 {wordFetchError && wordSource === "fallback" && (
