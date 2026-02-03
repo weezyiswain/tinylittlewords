@@ -49,15 +49,15 @@ function LetterKey({
         borderRadius: KEY_RADIUS,
       }}
       className={cn(
-        "flex shrink-0 items-center justify-center border-0 font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(14px,3vw,17px)]",
+        "flex shrink-0 items-center justify-center border font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(14px,3vw,17px)]",
         !status &&
-          "bg-[#d1d5db] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.8)_inset,0_2px_0_0_rgba(0,0,0,0.1)] active:bg-[#c4c8cc]",
+          "border-neutral-300 bg-[#e8eaed] text-foreground active:bg-[#dce0e5]",
         status === "correct" &&
-          "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+          "border-emerald-500 bg-emerald-500 text-white shadow-[0_1px_0_rgba(0,0,0,0.15)]",
         status === "present" &&
-          "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+          "border-amber-400 bg-amber-400 text-white shadow-[0_1px_0_rgba(0,0,0,0.15)]",
         status === "absent" &&
-          "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]"
+          "border-neutral-400 bg-[#9ca3af] text-white/90 shadow-[0_1px_0_rgba(0,0,0,0.15)]"
       )}
       aria-label={`Letter ${letter}`}
     >
@@ -90,8 +90,8 @@ function ActionKey({
         borderRadius: KEY_RADIUS,
       }}
       className={cn(
-        "flex min-w-0 flex-1 items-center justify-center border-0 font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(12px,2.8vw,15px)]",
-        "bg-[#9ca3af] text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] active:bg-[#8b92a0]"
+        "flex min-w-0 flex-1 items-center justify-center border font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(12px,2.8vw,15px)]",
+        "border-neutral-400 bg-[#9ca3af] text-white shadow-[0_1px_0_rgba(0,0,0,0.15)] active:bg-[#8b92a0]"
       )}
       aria-label={ariaLabel}
     >
@@ -109,7 +109,7 @@ export function Keyboard({
 }: KeyboardProps) {
   return (
     <div
-      className="w-full bg-transparent"
+      className="box-border w-full min-w-0 overflow-x-hidden bg-transparent"
       style={{
         paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
         paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
@@ -118,8 +118,8 @@ export function Keyboard({
       }}
     >
       <div
-        className="mx-auto flex w-full max-w-[540px] flex-col items-center"
-        style={{ gap: KEY_GAP, paddingLeft: "12px", paddingRight: "12px" }}
+        className="mx-auto box-border flex w-full max-w-[min(520px,calc(100vw-2rem))] min-w-0 flex-col items-center"
+        style={{ gap: KEY_GAP }}
       >
         {/* Row 1: QWERTYUIOP - 10 keys */}
         <div
@@ -139,8 +139,8 @@ export function Keyboard({
 
         {/* Row 2: ASDFGHJKL - 9 keys with inset (iOS-style) */}
         <div
-          className="flex justify-center"
-          style={{ gap: KEY_GAP, paddingLeft: "24px", paddingRight: "24px" }}
+          className="flex w-full justify-center"
+          style={{ gap: KEY_GAP, paddingLeft: "clamp(12px, 4vw, 24px)", paddingRight: "clamp(12px, 4vw, 24px)" }}
         >
           {ROW2.map((letter) => (
             <LetterKey
@@ -155,7 +155,7 @@ export function Keyboard({
 
         {/* Row 3: Enter + ZXCVBNM + Backspace (Enter/Backspace wider, same height) */}
         <div
-          className="grid w-full max-w-[540px] items-center"
+          className="grid w-full min-w-0 items-center"
           style={{
             gap: KEY_GAP,
             gridTemplateColumns: "1.5fr repeat(7, minmax(0, 1fr)) 1.5fr",

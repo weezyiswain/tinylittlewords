@@ -285,6 +285,7 @@ function PlayPageContent() {
   const [statsRefresh, setStatsRefresh] = useState(0);
   const [invalidWordShake, setInvalidWordShake] = useState(false);
   const [lastEvaluatedRowIndex, setLastEvaluatedRowIndex] = useState<number | null>(null);
+  const [buddyAnimation, setBuddyAnimation] = useState<"correct" | "present" | "absent" | null>(null);
   const recordedForRoundRef = useRef(false);
 
   const targetWord = currentPuzzle?.word ?? "";
@@ -520,7 +521,7 @@ function PlayPageContent() {
         </DialogTrigger>
         <DialogContent
           className={cn(
-            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-white/95 px-6 pt-6 pb-4",
+            "flex max-h-[85dvh] w-[min(calc(100vw-2rem),28rem)] flex-col overflow-hidden border-white/70 bg-[#fafafa] px-6 pt-6 pb-[max(1rem,env(safe-area-inset-bottom,0px))]",
             theme.resultModal
           )}
         >
@@ -615,7 +616,7 @@ function PlayPageContent() {
       <SheetContent
         side="bottom"
         className={cn(
-          "max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-white/90 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,34px))] pt-5 backdrop-blur",
+          "max-h-[85dvh] w-full rounded-t-3xl border-t border-white/60 bg-[#fafafa] px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,44px))] pt-5 backdrop-blur",
           theme.sheetShadow
         )}
       >
@@ -725,6 +726,16 @@ function PlayPageContent() {
       setLastEvaluatedRowIndex(evaluatedRowIndex);
       setTimeout(() => setLastEvaluatedRowIndex(null), 400);
 
+      const hasCorrect = evaluation.some((s) => s === "correct");
+      const hasPresent = evaluation.some((s) => s === "present");
+      const anim: "correct" | "present" | "absent" = hasCorrect
+        ? "correct"
+        : hasPresent
+          ? "present"
+          : "absent";
+      setBuddyAnimation(anim);
+      setTimeout(() => setBuddyAnimation(null), 400);
+
       const nextIsSolved = currentGuess === targetWord;
       const nextGuessCount = guesses.length + 1;
 
@@ -832,7 +843,7 @@ function PlayPageContent() {
   }, [handleBackspace, handleLetter, handleSubmit]);
 
   return (
-    <main className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#fafafa]">
+    <main className="relative flex min-h-[100dvh] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[#fafafa]">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
@@ -870,15 +881,34 @@ function PlayPageContent() {
           <ChevronLeft className="h-5 w-5" aria-hidden />
         </Link>
 
-        <div
+        <motion.div
           className={cn(
             "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/85 text-2xl shadow-[0_6px_16px_rgba(0,0,0,0.1)] backdrop-blur sm:h-14 sm:w-14",
             avatar.bg
           )}
           aria-hidden
+          animate={
+            buddyAnimation === "correct"
+              ? {
+                  scale: [1, 1.15, 1.1, 1],
+                  transition: { duration: 0.35, ease: "easeOut" },
+                }
+              : buddyAnimation === "present"
+                ? {
+                    scale: [1, 1.06, 1],
+                    rotate: [0, -4, 4, 0],
+                    transition: { duration: 0.3, ease: "easeOut" },
+                  }
+                : buddyAnimation === "absent"
+                  ? {
+                      x: [0, -4, 4, -2, 2, 0],
+                      transition: { duration: 0.25, ease: "easeOut" },
+                    }
+                  : undefined
+          }
         >
           {avatar.emoji}
-        </div>
+        </motion.div>
 
         {renderHintHelp(undefined, "muted")}
       </header>
@@ -1096,9 +1126,9 @@ function PlayPageContent() {
         </div>
       </section>
 
-      <footer className="relative z-10 w-full shrink-0 bg-transparent">
-        <div className="w-full pt-2">
-          <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center gap-2 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
+      <footer className="relative z-10 w-full min-w-0 shrink-0 overflow-x-hidden bg-transparent">
+        <div className="w-full min-w-0 pt-2">
+          <div className="mx-auto flex w-full max-w-3xl min-w-0 flex-col items-center justify-center gap-2 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
             <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
           </div>
           <div className="flex justify-center py-2">
