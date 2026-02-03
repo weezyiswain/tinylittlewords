@@ -699,8 +699,11 @@ function PlayPageContent() {
   }, [handleBackspace, handleLetter, handleSubmit]);
 
   return (
-    <main className="relative flex min-h-[var(--app-height,100dvh)] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg)]">
-      <div className="pointer-events-none absolute inset-0 -z-10">
+    <main className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom))] min-w-0 flex-col overflow-x-hidden overflow-y-hidden bg-[var(--app-bg)]">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{ bottom: "calc(-1 * var(--safe-bottom, 0px))", minHeight: "calc(100% + var(--safe-bottom, 0px))" }}
+      >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(

@@ -132,7 +132,7 @@
   html {
     height: 100%;
     min-height: -webkit-fill-available;
-    min-height: var(--app-height, 100dvh);
+    min-height: calc(var(--app-height, 100dvh) + var(--safe-bottom));
     background-color: var(--app-bg);
     overscroll-behavior-y: none;
     overscroll-behavior-x: contain;
@@ -155,10 +155,10 @@
     overflow-x: hidden;
     min-height: 100%;
     min-height: -webkit-fill-available;
-    min-height: var(--app-height, 100dvh);
+    min-height: calc(var(--app-height, 100dvh) + var(--safe-bottom));
     position: relative;
   }
-  /* Extend background into bottom safe area - prevents white strip on iOS PWA */
+  /* Extra fill for bottom safe area when body gradient doesn't reach */
   body::after {
     content: "";
     position: fixed;

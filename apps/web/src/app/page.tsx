@@ -206,7 +206,7 @@ export default function Home() {
       <div
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
-          minHeight: "var(--app-height, 100dvh)",
+          minHeight: "calc(var(--app-height, 100dvh) + var(--safe-bottom, 0px))",
           bottom: "calc(-1 * var(--safe-bottom, 0px))",
         }}
         aria-hidden
@@ -236,7 +236,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="relative flex min-h-[var(--app-height,100dvh)] flex-col overflow-x-hidden bg-[var(--app-bg)]"
+        className="relative flex min-h-[calc(var(--app-height,100dvh)+var(--safe-bottom))] flex-col overflow-x-hidden bg-[var(--app-bg)]"
       >
       <Script
         id="home-structured-data"
@@ -306,7 +306,7 @@ export default function Home() {
                       aria-checked={lengthOption === selectedLength}
                       aria-label={`${lengthOption}-letter words (${LENGTH_LABEL[lengthOption]})`}
                       className={cn(
-                        "flex h-16 flex-col items-center justify-center rounded-xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-[4.5rem]",
+                        "flex h-14 min-h-[3.5rem] items-center justify-center rounded-xl border border-transparent bg-white/85 text-center font-semibold text-foreground transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-14",
                         theme.wordLengthBase,
                         theme.wordLengthHover,
                         "hover:border-neutral-400",
@@ -316,9 +316,6 @@ export default function Home() {
                       )}
                     >
                       <span className="text-xl font-bold sm:text-2xl">{lengthOption}</span>
-                      <span className="text-xs uppercase tracking-wide text-muted-foreground/80">
-                        {LENGTH_LABEL[lengthOption]}
-                      </span>
                     </button>
                   ))}
                 </div>

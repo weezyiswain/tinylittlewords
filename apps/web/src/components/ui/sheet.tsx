@@ -42,6 +42,7 @@ function SheetOverlay({
       )}
       style={{
         bottom: "calc(-1 * var(--safe-bottom, 0px))",
+        minHeight: "calc(100dvh + var(--safe-bottom, 0px))",
         ...style,
       }}
       {...props}
