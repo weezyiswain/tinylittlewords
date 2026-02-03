@@ -1055,7 +1055,7 @@ function PlayPageContent() {
               theme.resultModal
             )}
           >
-            <div className="grid min-h-0 flex-1 auto-rows-fr gap-1.5 sm:gap-2">
+            <div className="grid grid-flow-row auto-rows-min gap-1 sm:gap-1.5">
               {Array.from({ length: allowedGuesses }).map((_, rowIndex) => {
                 const guess = guesses[rowIndex] ?? "";
                 const evaluation = results[rowIndex];
@@ -1067,7 +1067,7 @@ function PlayPageContent() {
                 return (
                   <div
                     key={`row-${rowIndex}`}
-                    className="grid gap-1.5 sm:gap-2"
+                    className="grid gap-1 sm:gap-1.5"
                     style={{
                       gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))`,
                     }}
@@ -1080,9 +1080,11 @@ function PlayPageContent() {
                         <div
                           key={`row-${rowIndex}-cell-${letterIndex}`}
                           className={cn(
-                            "flex min-h-[2.25rem] items-center justify-center rounded-lg border text-base font-bold uppercase transition sm:text-lg lg:text-xl",
-                            status === "correct" && theme.letterCorrect,
-                            status === "present" && theme.letterPresent,
+                            "flex aspect-square min-h-0 max-h-9 w-full items-center justify-center rounded border text-sm font-bold uppercase transition sm:max-h-10 sm:text-base",
+                            status === "correct" &&
+                              "border-emerald-500 bg-emerald-500 text-white",
+                            status === "present" &&
+                              "border-amber-400 bg-amber-400 text-white",
                             status === "absent" &&
                               "border-slate-300 bg-slate-200 text-slate-600",
                             !status &&
@@ -1190,13 +1192,13 @@ function PlayPageContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
           className={cn(
-            "mt-2 w-full border-t border-white/60 bg-white pb-[calc(0.5rem+env(safe-area-inset-bottom,34px))] sm:pb-[calc(1.5rem+env(safe-area-inset-bottom,34px))] lg:pb-[calc(2rem+env(safe-area-inset-bottom,34px))]",
+            "mt-1 w-full border-t border-white/40 bg-transparent px-4 pb-[calc(1rem+env(safe-area-inset-bottom,34px))] pt-3 sm:px-6 sm:pb-[calc(1.25rem+env(safe-area-inset-bottom,34px))] lg:pb-[calc(1.5rem+env(safe-area-inset-bottom,34px))]",
             theme.bottomBarShadow
           )}
         >
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-2 pt-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-2xl flex-col gap-1.5 px-0 pt-0 sm:gap-2">
             {KEYBOARD_ROWS.map((row, rowIndex) => (
-              <div key={`kb-row-${rowIndex}`} className="flex justify-center gap-1">
+              <div key={`kb-row-${rowIndex}`} className="flex justify-center gap-1.5">
                 {rowIndex === KEYBOARD_ROWS.length - 1 ? (
                   <>
                     <button
@@ -1205,8 +1207,8 @@ function PlayPageContent() {
                         void handleSubmit();
                       }}
                       className={cn(
-                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-base font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-lg",
-                        theme.keyBase
+                        "ios-key flex h-14 min-w-[3.75rem] max-w-[5rem] flex-1 items-center justify-center rounded-[5px] border-0 bg-[#acb4be] text-base font-medium text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[4rem] sm:text-lg",
+                        (isGameOver || isCheckingWord) && "opacity-70"
                       )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Submit guess"
@@ -1221,12 +1223,15 @@ function PlayPageContent() {
                           type="button"
                           onClick={() => handleLetter(key)}
                           className={cn(
-                            "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-base font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-lg sm:min-w-[2.4rem]",
-                            theme.keyBase,
-                            status === "correct" && theme.letterCorrect,
-                            status === "present" && theme.letterPresent,
+                            "ios-key flex h-14 min-w-[2.25rem] max-w-[3.5rem] flex-1 items-center justify-center rounded-[5px] border-0 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[2.5rem] sm:text-xl",
+                            !status &&
+                              "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
+                            status === "correct" &&
+                              "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                            status === "present" &&
+                              "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
                             status === "absent" &&
-                              "border-slate-300 bg-slate-200 text-slate-600",
+                              "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
                             (isGameOver || isCheckingWord) && "opacity-70"
                           )}
                           disabled={isGameOver || !currentPuzzle || isCheckingWord}
@@ -1240,13 +1245,13 @@ function PlayPageContent() {
                       type="button"
                       onClick={handleBackspace}
                       className={cn(
-                        "flex h-11 min-w-[3.4rem] items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-foreground transition active:scale-[0.98] sm:h-12",
-                        theme.keyBase
+                        "ios-key flex h-14 min-w-[3.75rem] max-w-[5rem] flex-1 items-center justify-center rounded-[5px] border-0 bg-[#acb4be] text-foreground shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[4rem]",
+                        (isGameOver || isCheckingWord) && "opacity-70"
                       )}
                       disabled={isGameOver || !currentPuzzle || isCheckingWord}
                       aria-label="Delete letter"
                     >
-                      <Delete className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
+                      <Delete className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
                     </button>
                   </>
                 ) : (
@@ -1258,12 +1263,15 @@ function PlayPageContent() {
                         type="button"
                         onClick={() => handleLetter(key)}
                         className={cn(
-                          "flex h-11 min-w-[2.2rem] flex-1 items-center justify-center rounded-lg border-2 border-slate-300/90 bg-white/85 text-base font-semibold text-foreground transition active:scale-[0.98] sm:h-12 sm:text-lg sm:min-w-[2.4rem]",
-                          theme.keyBase,
-                          status === "correct" && theme.letterCorrect,
-                          status === "present" && theme.letterPresent,
+                          "ios-key flex h-14 min-w-[2.25rem] max-w-[3.5rem] flex-1 items-center justify-center rounded-[5px] border-0 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[2.5rem] sm:text-xl",
+                          !status &&
+                            "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
+                          status === "correct" &&
+                            "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                          status === "present" &&
+                            "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
                           status === "absent" &&
-                            "border-slate-300 bg-slate-200 text-slate-600",
+                            "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
                           (isGameOver || isCheckingWord) && "opacity-70"
                         )}
                         disabled={isGameOver || !currentPuzzle || isCheckingWord}

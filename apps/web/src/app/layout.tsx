@@ -69,6 +69,15 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className="h-full font-sans antialiased">
         {children}
+        {/* Force bottom safe area to match app background so no white strip shows on iOS */}
+        <div
+          aria-hidden
+          className="pointer-events-none fixed bottom-0 left-0 right-0 z-[9998]"
+          style={{
+            height: "env(safe-area-inset-bottom, 34px)",
+            background: "#fafafa",
+          }}
+        />
       </body>
     </html>
   );

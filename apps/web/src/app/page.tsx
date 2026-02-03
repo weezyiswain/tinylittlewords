@@ -10,9 +10,7 @@ import { AVATAR_OPTIONS, getRandomAvatar } from "@/lib/avatars";
 import { getBuddyTheme } from "@/lib/buddy-themes";
 import { supabase } from "@/lib/supabaseClient";
 import { canonicalUrl, seoConfig } from "@/lib/seo";
-import { Button } from "@/components/ui/button";
 import { WordPackSelect } from "@/components/word-pack-select";
-import { ChevronRight, Users } from "lucide-react";
 
 const WORD_LENGTH_OPTIONS = [3, 4, 5] as const;
 const AGE_SHORT_COPY: Record<(typeof WORD_LENGTH_OPTIONS)[number], string> = {
@@ -206,7 +204,7 @@ export default function Home() {
       <div
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
-          bottom: "calc(-1 * env(safe-area-inset-bottom, 0px))",
+          bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))",
           minHeight: "max(100dvh, 100svh)",
         }}
         aria-hidden
@@ -266,22 +264,10 @@ export default function Home() {
         ) : (
           <>
             <div className="shrink-0 w-full px-4 sm:px-8">
-              <div className="mx-auto flex max-w-xl items-center justify-between gap-3 py-2 sm:py-3">
+              <div className="mx-auto flex max-w-xl justify-center py-2 sm:py-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
                 </p>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  asChild
-                  className="shrink-0 border-neutral-300 bg-white/90 text-neutral-600 shadow-sm transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-neutral-500"
-                >
-                  <Link href="/parents" className="gap-1.5">
-                    <Users className="size-4" aria-hidden />
-                    For parents
-                    <ChevronRight className="size-4" aria-hidden />
-                  </Link>
-                </Button>
               </div>
             </div>
 
@@ -398,14 +384,14 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="shrink-0 w-full px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom,34px))] sm:px-8 sm:pb-[calc(2rem+env(safe-area-inset-bottom,34px))]">
-              <div className="mx-auto max-w-xl">
+            <div className="shrink-0 w-full px-4 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom,34px))] sm:px-8 sm:pb-[calc(2.5rem+env(safe-area-inset-bottom,34px))]">
+              <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
                 <motion.button
                   type="button"
                   onClick={handleStart}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "w-full rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "w-2/3 min-w-[12rem] max-w-[18rem] rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     theme.ctaGradient,
                     theme.ctaShadow,
                     theme.ctaShadowHover
@@ -413,6 +399,12 @@ export default function Home() {
                 >
                   Start playing
                 </motion.button>
+                <Link
+                  href="/parents"
+                  className="inline-flex items-center justify-center rounded-full border-2 border-neutral-300 bg-transparent px-4 py-2.5 text-sm font-medium text-foreground transition hover:border-neutral-400 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98]"
+                >
+                  For parents
+                </Link>
               </div>
             </div>
           </>
