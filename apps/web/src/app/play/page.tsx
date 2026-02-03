@@ -1,6 +1,14 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -262,7 +270,6 @@ export default function PlayPage() {
 function PlayPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [isHintSheetOpen, setIsHintSheetOpen] = useState(false);
 
   const lengthFromParams = Number(searchParams?.get("length") ?? NaN);
@@ -275,6 +282,38 @@ function PlayPageContent() {
   const seed = searchParams?.get("seed") ?? null;
   const avatar = useMemo(() => chooseAvatar(avatarId), [avatarId]);
   const theme = useMemo(() => getBuddyTheme(avatar.id), [avatar.id]);
+  const boardContainerStyle = useMemo(
+    () =>
+      ({
+        "--tile-size": "clamp(44px, 10.5vw, 60px)",
+        "--tile-gap": "clamp(8px, 1.8vw, 14px)",
+        width: "100%",
+        maxWidth: `calc(var(--tile-size) * ${wordLength} + var(--tile-gap) * ${Math.max(
+          0,
+          wordLength - 1
+        )})`,
+        maxHeight: "100%",
+      }) as CSSProperties,
+    [wordLength]
+  );
+  const boardRowStyle = useMemo(
+    () =>
+      ({
+        gridTemplateColumns: `repeat(${wordLength}, var(--tile-size))`,
+        gap: "var(--tile-gap)",
+      }) as CSSProperties,
+    [wordLength]
+  );
+  const boardStackStyle = useMemo(
+    () =>
+      ({
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--tile-gap)",
+        maxHeight: "100%",
+      }) as CSSProperties,
+    []
+  );
 
   const [resolvedSurprisePack, setResolvedSurprisePack] = useState<{
     id: string;
@@ -526,11 +565,11 @@ function PlayPageContent() {
     const baseClasses =
       variant === "muted"
         ? cn(
-            "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+            "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
             theme.backButton
           )
         : cn(
-            "flex h-9 w-9 items-center justify-center rounded-full border border-transparent bg-gradient-to-br text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+            "flex h-11 w-11 items-center justify-center rounded-full border border-transparent bg-gradient-to-br text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
             `bg-gradient-to-br ${theme.ctaGradient}`,
             theme.ctaShadow,
             theme.ctaShadowHover
@@ -629,7 +668,7 @@ function PlayPageContent() {
         <button
           type="button"
           className={cn(
-            "inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-4 text-sm font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:h-10",
+            "inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-5 text-sm font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:h-11",
             theme.backButton,
             hintButtonHighlight && cn(theme.hintHighlight, "animate-bounce")
           )}
@@ -865,57 +904,9 @@ function PlayPageContent() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleBackspace, handleLetter, handleSubmit]);
 
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    let startY = 0;
-
-    const handleTouchStart = (event: TouchEvent) => {
-      if (event.touches.length !== 1) return;
-      startY = event.touches[0].clientY;
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      if (event.touches.length !== 1) return;
-      if (container.scrollHeight <= container.clientHeight) return;
-
-      const currentY = event.touches[0].clientY;
-      const deltaY = currentY - startY;
-      const atTop = container.scrollTop <= 0;
-      const atBottom =
-        Math.ceil(container.scrollTop + container.clientHeight) >=
-        container.scrollHeight;
-
-      if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
-        event.preventDefault();
-      } else {
-        startY = currentY;
-      }
-    };
-
-    container.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
-    container.addEventListener("touchmove", handleTouchMove, {
-      passive: false,
-    });
-
-    return () => {
-      container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, []);
-
   return (
-    <main
-      className="fixed inset-0 flex flex-col overflow-hidden bg-[#fafafa]"
-      style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))" }}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))" }}
-      >
+    <main className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#fafafa]">
+      <div className="pointer-events-none absolute inset-0 -z-10">
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
         <div
           className={cn(
@@ -936,193 +927,78 @@ function PlayPageContent() {
           )}
         />
       </div>
-      <div
-        ref={scrollContainerRef}
-        className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-[#fafafa]"
-        style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+
+      <header
+        className="relative z-10 w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pb-3 sm:pl-6 sm:pr-6"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
       >
-        <section className="mx-auto flex min-h-0 w-full flex-1 flex-col pb-2 pt-[calc(env(safe-area-inset-top,0px)+1.25rem)] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:pb-4 sm:pl-6 sm:pr-6 sm:pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] lg:max-w-6xl lg:grid lg:grid-cols-[1fr_minmax(18rem,28rem)_1fr] lg:items-start lg:gap-6">
-        <div className="hidden lg:block" aria-hidden />
-
-        <div className="flex min-h-0 min-w-0 w-full max-w-xl flex-1 flex-col lg:col-start-2 lg:justify-self-center lg:max-w-3xl">
-          <div
-            className="mb-2 flex shrink-0 items-center gap-2 sm:mb-4 sm:gap-3"
-            style={{ perspective: "1600px" }}
+        <div className="mx-auto grid w-full max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
+          <Link
+            href="/"
+            className={cn(
+              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+              theme.backButton
+            )}
+            aria-label="Back to puzzles"
           >
-            <Link
-              href="/"
+            <ChevronLeft className="h-5 w-5" aria-hidden />
+          </Link>
+
+          <motion.div
+            animate={{ rotateY: isMessageFlipped ? 180 : 0 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            style={{ transformStyle: "preserve-3d" }}
+            className="relative flex min-h-[56px] flex-1 items-stretch"
+          >
+            <div
               className={cn(
-                "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-                theme.backButton
+                "flex w-full items-center gap-3 rounded-full border border-white/70 bg-white/85 px-4 py-2.5 backdrop-blur",
+                theme.statusCard
               )}
-              aria-label="Back to puzzles"
+              style={{ backfaceVisibility: "hidden" }}
+              aria-live="polite"
+              role="status"
             >
-              <ChevronLeft className="h-5 w-5" aria-hidden />
-            </Link>
-            <motion.div
-              animate={{ rotateY: isMessageFlipped ? 180 : 0 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              style={{ transformStyle: "preserve-3d" }}
-              className="relative h-full flex-1"
-            >
-              <div
-                className={cn(
-                  "flex items-center gap-3 rounded-3xl border border-white/70 bg-white/85 px-4 py-3 backdrop-blur",
-                  theme.statusCard
-                )}
-                style={{ backfaceVisibility: "hidden" }}
-                aria-live="polite"
-                role="status"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex h-11 w-11 items-center justify-center rounded-full text-2xl shadow-[0_8px_18px_rgba(0,0,0,0.1)] sm:h-12 sm:w-12",
-                      avatar.bg
-                    )}
-                    aria-hidden
-                  >
-                    {avatar.emoji}
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      Playing with
-                    </p>
-                    <p className="text-sm font-semibold text-foreground">
-                      Your buddy
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={cn(
-                  "absolute inset-0 flex flex-col justify-center rounded-3xl border px-4 py-3 backdrop-blur",
-                  statusMessage?.tone === "encouragement" && statusMessage?.speaker
-                    ? theme.statusCardFlip
-                    : statusMessage?.tone === "success"
-                    ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_45px_rgba(16,185,129,0.2)]"
-                    : cn("border-white/70 bg-white/90", theme.statusCard)
-                )}
-                style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-              >
-                {statusMessage?.tone === "encouragement" && statusMessage?.speaker ? (
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-2xl",
-                        theme.keyBase
-                      )}
-                    >
-                      {statusMessage.speaker.emoji}
-                    </span>
-                    <div className="flex flex-col">
-                      <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground/70">
-                        Your buddy says
-                      </span>
-                      <span
-                        className={cn(
-                          "mt-1 text-sm font-semibold leading-snug sm:text-base",
-                          encouragementAccent.message
-                        )}
-                      >
-                        {statusMessage.text}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-start justify-center gap-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                      Message
-                    </p>
-                    <p
-                      className={cn(
-                        "text-base font-semibold leading-snug sm:text-lg",
-                        statusMessage?.tone === "success"
-                          ? "text-emerald-900"
-                          : "text-foreground"
-                      )}
-                    >
-                      {statusMessage?.text ?? "You're doing great!"}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-            {renderHintAccess()}
-            {renderHintHelp(undefined, "muted")}
-          </div>
-
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="flex min-h-0 flex-1 flex-col gap-2 sm:gap-4"
-        >
-          {packLabel != null && packLabel.trim() !== "" && (
-            <p className="shrink-0 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-[0.7rem]">
-              Pack: {packLabel}
-            </p>
-          )}
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden space-y-2 p-2 sm:space-y-3 sm:p-3">
-            <div className="grid grid-flow-row auto-rows-min gap-1 sm:gap-1.5">
-              {Array.from({ length: allowedGuesses }).map((_, rowIndex) => {
-                const guess = guesses[rowIndex] ?? "";
-                const evaluation = results[rowIndex];
-                const isCurrentRow =
-                  rowIndex === guesses.length && !isGameOver;
-
-                const display = isCurrentRow ? currentGuess : guess;
-
-                return (
-                  <div
-                    key={`row-${rowIndex}`}
-                    className="grid gap-1 sm:gap-1.5"
-                    style={{
-                      gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))`,
-                    }}
-                  >
-                    {Array.from({ length: wordLength }).map((_, letterIndex) => {
-                      const letter = display[letterIndex];
-                      const status = evaluation?.[letterIndex];
-
-                      return (
-                        <div
-                          key={`row-${rowIndex}-cell-${letterIndex}`}
-                          className={cn(
-                            "flex aspect-square min-h-0 w-full items-center justify-center rounded border text-sm font-bold uppercase transition sm:text-base",
-                            status === "correct" &&
-                              "border-emerald-500 bg-emerald-500 text-white",
-                            status === "present" &&
-                              "border-amber-400 bg-amber-400 text-white",
-                            status === "absent" &&
-                              "border-slate-300 bg-slate-200 text-slate-600",
-                            !status &&
-                              letter &&
-                              "border-primary/60 bg-primary/10 text-primary",
-                            !letter &&
-                              "border-border bg-background text-muted-foreground/40"
-                          )}
-                        >
-                          {letter ?? ""}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-
-            {statusMessage && !shouldFlipMessage && (
-              statusMessage.tone === "encouragement" && statusMessage.speaker ? (
+              <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm shadow-md",
-                    statusMessage.speaker.bg,
-                    encouragementAccent.border
+                    "flex h-11 w-11 items-center justify-center rounded-full text-2xl shadow-[0_8px_18px_rgba(0,0,0,0.1)]",
+                    avatar.bg
                   )}
+                  aria-hidden
                 >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-2xl">
+                  {avatar.emoji}
+                </div>
+                <div>
+                  <p className="text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
+                    Playing with
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    Your buddy
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={cn(
+                "absolute inset-0 flex flex-col justify-center rounded-full border px-4 py-2.5 backdrop-blur",
+                statusMessage?.tone === "encouragement" && statusMessage?.speaker
+                  ? theme.statusCardFlip
+                  : statusMessage?.tone === "success"
+                  ? "border-emerald-300 bg-emerald-50 shadow-[0_18px_45px_rgba(16,185,129,0.2)]"
+                  : cn("border-white/70 bg-white/90", theme.statusCard)
+              )}
+              style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+            >
+              {statusMessage?.tone === "encouragement" && statusMessage?.speaker ? (
+                <div className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      "flex h-12 w-12 items-center justify-center rounded-full bg-white/85 text-2xl",
+                      theme.keyBase
+                    )}
+                  >
                     {statusMessage.speaker.emoji}
                   </span>
                   <div className="flex flex-col">
@@ -1140,211 +1016,344 @@ function PlayPageContent() {
                   </div>
                 </div>
               ) : (
-                <div
-                  className={cn(
-                    "rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
-                    STATUS_TONE_STYLES[statusMessage.tone] ??
-                      STATUS_TONE_STYLES.info
-                  )}
-                >
-                  {statusMessage.text}
-                </div>
-              )
-            )}
-
-            {wordFetchError && wordSource === "fallback" && (
-              <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700 shadow-sm">
-                Live words are taking a break (reason: {wordFetchError}). Using our cozy backup list for now.
-              </div>
-            )}
-
-            {showRetryPrompt && (
-              <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-800 shadow-sm">
-                <p className="text-base font-semibold">Bonus chance unlocked!</p>
-                <p className="mt-1">
-                  Take one more try or choose a new puzzle.
-                  {hasHintAvailable
-                    ? " Your hint is still waiting to help."
-                    : ""}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleRetryRound}
-                    className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  >
-                    Try again
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleChooseNewPuzzle}
-                    className="inline-flex items-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-700 transition hover:border-amber-400 hover:text-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  >
-                    Choose a new puzzle
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {isGameOver && (
-              <div
-                className={cn(
-                  "rounded-2xl border px-4 py-4 shadow-md sm:px-5 sm:py-5",
-                  theme.statusCardFlip
-                )}
-              >
-                <p className="text-center text-base font-semibold text-foreground sm:text-lg">
-                  {isSolved ? "You did it!" : "Nice try!"}
-                </p>
-                <p className="mt-1 text-center text-sm text-muted-foreground">
-                  Play again with the same buddy & pack, or start a new game.
-                </p>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-                  <button
-                    type="button"
-                    onClick={handlePlayAgain}
+                <div className="flex flex-col items-start justify-center gap-1">
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+                    Message
+                  </p>
+                  <p
                     className={cn(
-                      "inline-flex items-center justify-center rounded-full bg-gradient-to-r px-5 py-3 text-base font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      theme.ctaGradient,
-                      theme.ctaShadow,
-                      theme.ctaShadowHover
+                      "text-base font-semibold leading-snug sm:text-lg",
+                      statusMessage?.tone === "success"
+                        ? "text-emerald-900"
+                        : "text-foreground"
                     )}
                   >
-                    Play again
-                  </button>
-                  <Link
-                    href="/"
-                    onClick={() => {
-                      if (isOutOfTries && !recordedForRoundRef.current) {
-                        recordedForRoundRef.current = true;
-                        recordGame(false);
-                        setStatsRefresh((n) => n + 1);
-                      }
-                    }}
-                    className={cn(
-                      "inline-flex items-center justify-center rounded-full border-2 bg-white/90 px-5 py-3 text-base font-semibold text-foreground transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                      theme.buddySelectedBorder,
-                      "hover:opacity-90"
-                    )}
-                  >
-                    New game
-                  </Link>
+                    {statusMessage?.text ?? "You're doing great!"}
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          </motion.div>
+
+          <div className="flex items-center justify-end gap-2">
+            {renderHintAccess()}
+            {renderHintHelp(undefined, "muted")}
           </div>
-
-        </motion.section>
-      </div>
-        </section>
-      </div>
-
-    <div className="shrink-0 w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] sm:px-6">
-      <div className="mx-auto w-full max-w-none">
-        <div className="flex flex-col items-center justify-center gap-1">
-          <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
         </div>
-        <motion.nav
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
-          className={cn(
-            "mt-1 w-full shrink-0 border-t border-white/40 bg-transparent pb-[calc(2rem+env(safe-area-inset-bottom,34px))] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pt-3 sm:pb-[calc(2.25rem+env(safe-area-inset-bottom,34px))] sm:pl-6 sm:pr-6 lg:pb-[calc(2.5rem+env(safe-area-inset-bottom,34px))]",
-            theme.bottomBarShadow
-          )}
-        >
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-1.5 px-0 pt-0 sm:gap-2">
-            {KEYBOARD_ROWS.map((row, rowIndex) => (
-              <div key={`kb-row-${rowIndex}`} className="flex justify-center gap-1.5">
-                {rowIndex === KEYBOARD_ROWS.length - 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void handleSubmit();
-                      }}
-                      className={cn(
-                        "ios-key flex h-14 min-w-[3.75rem] max-w-[5rem] flex-1 items-center justify-center rounded-[5px] border-0 bg-[#acb4be] text-base font-medium text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[4rem] sm:text-lg",
-                        (isGameOver || isCheckingWord) && "opacity-70"
-                      )}
-                      disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                      aria-label="Submit guess"
-                    >
-                      Enter
-                    </button>
-                    {row.map((key) => {
-                      const status = keyboardStatus[key];
+      </header>
+
+      <section className="relative z-10 flex flex-1 flex-col overflow-hidden">
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pb-4 sm:pl-6 sm:pr-6 sm:pb-6">
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="flex min-h-0 flex-1 flex-col gap-3"
+          >
+            {packLabel != null && packLabel.trim() !== "" && (
+              <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground sm:text-[0.7rem]">
+                Pack: {packLabel}
+              </p>
+            )}
+
+            <div className="flex min-h-0 flex-1 flex-col gap-4">
+              <div
+                className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-2 sm:px-4"
+                style={{ maxHeight: "100%" } as CSSProperties}
+              >
+                <div className="flex w-full flex-col items-center" style={boardContainerStyle}>
+                  <div className="flex w-full flex-col" style={boardStackStyle}>
+                    {Array.from({ length: allowedGuesses }).map((_, rowIndex) => {
+                      const guess = guesses[rowIndex] ?? "";
+                      const evaluation = results[rowIndex];
+                      const isCurrentRow =
+                        rowIndex === guesses.length && !isGameOver;
+
+                      const display = isCurrentRow ? currentGuess : guess;
+
                       return (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => handleLetter(key)}
+                        <div
+                          key={`row-${rowIndex}`}
+                          className="grid"
+                          style={boardRowStyle}
+                        >
+                          {Array.from({ length: wordLength }).map((_, letterIndex) => {
+                            const letter = display[letterIndex];
+                            const status = evaluation?.[letterIndex];
+
+                            return (
+                              <div
+                                key={`row-${rowIndex}-cell-${letterIndex}`}
+                                className={cn(
+                                  "flex aspect-square min-h-0 w-full items-center justify-center rounded border text-sm font-bold uppercase transition sm:text-base",
+                                  status === "correct" &&
+                                    "border-emerald-500 bg-emerald-500 text-white",
+                                  status === "present" &&
+                                    "border-amber-400 bg-amber-400 text-white",
+                                  status === "absent" &&
+                                    "border-slate-300 bg-slate-200 text-slate-600",
+                                  !status &&
+                                    letter &&
+                                    "border-primary/60 bg-primary/10 text-primary",
+                                  !letter &&
+                                    "border-border bg-background text-muted-foreground/40"
+                                )}
+                              >
+                                {letter ?? ""}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 overflow-y-auto pb-1">
+                {statusMessage && !shouldFlipMessage && (
+                  statusMessage.tone === "encouragement" && statusMessage.speaker ? (
+                    <div
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm shadow-md",
+                        statusMessage.speaker.bg,
+                        encouragementAccent.border
+                      )}
+                    >
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-2xl">
+                        {statusMessage.speaker.emoji}
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-foreground/70">
+                          Your buddy says
+                        </span>
+                        <span
                           className={cn(
-                            "ios-key flex h-14 min-w-[2.25rem] max-w-[3.5rem] flex-1 items-center justify-center rounded-[5px] border-0 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[2.5rem] sm:text-xl",
-                            !status &&
-                              "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
-                            status === "correct" &&
-                              "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                            status === "present" &&
-                              "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                            status === "absent" &&
-                              "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                            "mt-1 text-sm font-semibold leading-snug sm:text-base",
+                            encouragementAccent.message
+                          )}
+                        >
+                          {statusMessage.text}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className={cn(
+                        "rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
+                        STATUS_TONE_STYLES[statusMessage.tone] ??
+                          STATUS_TONE_STYLES.info
+                      )}
+                    >
+                      {statusMessage.text}
+                    </div>
+                  )
+                )}
+
+                {wordFetchError && wordSource === "fallback" && (
+                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700 shadow-sm">
+                    Live words are taking a break (reason: {wordFetchError}). Using our cozy backup list for now.
+                  </div>
+                )}
+
+                {showRetryPrompt && (
+                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-800 shadow-sm">
+                    <p className="text-base font-semibold">Bonus chance unlocked!</p>
+                    <p className="mt-1">
+                      Take one more try or choose a new puzzle.
+                      {hasHintAvailable
+                        ? " Your hint is still waiting to help."
+                        : ""}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={handleRetryRound}
+                        className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        Try again
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleChooseNewPuzzle}
+                        className="inline-flex items-center rounded-full border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-700 transition hover:border-amber-400 hover:text-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        Choose a new puzzle
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {isGameOver && (
+                  <div
+                    className={cn(
+                      "rounded-2xl border px-4 py-4 shadow-md sm:px-5 sm:py-5",
+                      theme.statusCardFlip
+                    )}
+                  >
+                    <p className="text-center text-base font-semibold text-foreground sm:text-lg">
+                      {isSolved ? "You did it!" : "Nice try!"}
+                    </p>
+                    <p className="mt-1 text-center text-sm text-muted-foreground">
+                      Play again with the same buddy & pack, or start a new game.
+                    </p>
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+                      <button
+                        type="button"
+                        onClick={handlePlayAgain}
+                        className={cn(
+                          "inline-flex items-center justify-center rounded-full bg-gradient-to-r px-5 py-3 text-base font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                          theme.ctaGradient,
+                          theme.ctaShadow,
+                          theme.ctaShadowHover
+                        )}
+                      >
+                        Play again
+                      </button>
+                      <Link
+                        href="/"
+                        onClick={() => {
+                          if (isOutOfTries && !recordedForRoundRef.current) {
+                            recordedForRoundRef.current = true;
+                            recordGame(false);
+                            setStatsRefresh((n) => n + 1);
+                          }
+                        }}
+                        className={cn(
+                          "inline-flex items-center justify-center rounded-full border-2 bg-white/90 px-5 py-3 text-base font-semibold text-foreground transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                          theme.buddySelectedBorder,
+                          "hover:opacity-90"
+                        )}
+                      >
+                        New game
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.section>
+        </div>
+      </section>
+
+      <footer className="relative z-10 w-full border-t border-white/60 bg-white/95 backdrop-blur">
+        <div
+          className="w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pt-3 sm:pl-6 sm:pr-6 sm:pt-4"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+          }}
+        >
+          <div className="mx-auto w-full max-w-3xl">
+            <div className="flex flex-col items-center justify-center gap-2">
+              <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
+            </div>
+          </div>
+          <motion.nav
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut", delay: 0.1 }}
+            className={cn(
+              "mt-3 w-full border border-white/60 bg-white/90 py-3 shadow-lg sm:py-4",
+              theme.bottomBarShadow
+            )}
+          >
+            <div className="mx-auto w-full max-w-[540px] px-3 sm:px-4">
+              <div className="flex w-full flex-col gap-1.5 sm:gap-2">
+                {KEYBOARD_ROWS.map((row, rowIndex) => (
+                  <div
+                    key={`kb-row-${rowIndex}`}
+                    className="flex w-full flex-wrap justify-center gap-1.5"
+                  >
+                    {rowIndex === KEYBOARD_ROWS.length - 1 ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleSubmit();
+                          }}
+                          className={cn(
+                            "ios-key flex h-14 min-w-[3rem] flex-none items-center justify-center rounded-[7px] border-0 bg-[#acb4be] px-3 text-sm font-semibold uppercase text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] sm:h-[3.5rem] sm:min-w-[3.5rem] sm:text-base",
                             (isGameOver || isCheckingWord) && "opacity-70"
                           )}
                           disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                          aria-label={`Letter ${key}`}
+                          aria-label="Submit guess"
                         >
-                          {key}
+                          Enter
                         </button>
-                      );
-                    })}
-                    <button
-                      type="button"
-                      onClick={handleBackspace}
-                      className={cn(
-                        "ios-key flex h-14 min-w-[3.75rem] max-w-[5rem] flex-1 items-center justify-center rounded-[5px] border-0 bg-[#acb4be] text-foreground shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[4rem]",
-                        (isGameOver || isCheckingWord) && "opacity-70"
-                      )}
-                      disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                      aria-label="Delete letter"
-                    >
-                      <Delete className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
-                    </button>
-                  </>
-                ) : (
-                  row.map((key) => {
-                    const status = keyboardStatus[key];
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => handleLetter(key)}
-                        className={cn(
-                          "ios-key flex h-14 min-w-[2.25rem] max-w-[3.5rem] flex-1 items-center justify-center rounded-[5px] border-0 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] active:translate-y-0.5 sm:h-[3.5rem] sm:min-w-[2.5rem] sm:text-xl",
-                          !status &&
-                            "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
-                          status === "correct" &&
-                            "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                          status === "present" &&
-                            "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                          status === "absent" &&
-                            "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
-                          (isGameOver || isCheckingWord) && "opacity-70"
-                        )}
-                        disabled={isGameOver || !currentPuzzle || isCheckingWord}
-                        aria-label={`Letter ${key}`}
-                      >
-                        {key}
-                      </button>
-                    );
-                  })
-                )}
+                        {row.map((key) => {
+                          const status = keyboardStatus[key];
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => handleLetter(key)}
+                              className={cn(
+                                "ios-key flex h-14 min-w-[1.85rem] flex-none items-center justify-center rounded-[7px] border-0 px-2 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] sm:h-[3.5rem] sm:min-w-[2.2rem] sm:text-xl",
+                                !status &&
+                                  "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
+                                status === "correct" &&
+                                  "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                                status === "present" &&
+                                  "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                                status === "absent" &&
+                                  "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                                (isGameOver || isCheckingWord) && "opacity-70"
+                              )}
+                              disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                              aria-label={`Letter ${key}`}
+                            >
+                              {key}
+                            </button>
+                          );
+                        })}
+                        <button
+                          type="button"
+                          onClick={handleBackspace}
+                          className={cn(
+                            "ios-key flex h-14 min-w-[3rem] flex-none items-center justify-center rounded-[7px] border-0 bg-[#acb4be] px-3 text-foreground shadow-[0_2px_0_0_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.2)] sm:h-[3.5rem] sm:min-w-[3.5rem]",
+                            (isGameOver || isCheckingWord) && "opacity-70"
+                          )}
+                          disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                          aria-label="Delete letter"
+                        >
+                          <Delete className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
+                        </button>
+                      </>
+                    ) : (
+                      row.map((key) => {
+                        const status = keyboardStatus[key];
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => handleLetter(key)}
+                            className={cn(
+                              "ios-key flex h-14 min-w-[1.85rem] flex-none items-center justify-center rounded-[7px] border-0 px-2 text-lg font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-75 active:translate-y-0.5 active:scale-[0.97] active:shadow-[0_0_0_0_rgba(0,0,0,0.15)] sm:h-[3.5rem] sm:min-w-[2.2rem] sm:text-xl",
+                              !status &&
+                                "bg-[#f7f7f8] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_2px_0_0_rgba(0,0,0,0.12)] active:bg-[#e8e8ed]",
+                              status === "correct" &&
+                                "bg-emerald-500 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                              status === "present" &&
+                                "bg-amber-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                              status === "absent" &&
+                                "bg-slate-400 text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)]",
+                              (isGameOver || isCheckingWord) && "opacity-70"
+                            )}
+                            disabled={isGameOver || !currentPuzzle || isCheckingWord}
+                            aria-label={`Letter ${key}`}
+                          >
+                            {key}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </motion.nav>
-      </div>
-    </div>
+            </div>
+          </motion.nav>
+        </div>
+      </footer>
     </main>
   );
 }
