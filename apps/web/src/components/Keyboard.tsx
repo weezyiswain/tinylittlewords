@@ -10,6 +10,11 @@ const ROW1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
 const ROW2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L"];
 const ROW3 = ["Z", "X", "C", "V", "B", "N", "M"];
 
+/* iOS-like keyboard: keyHeight 48px (clamp 44–52), keyRadius 14–16px, keyGap 6–8px */
+const KEY_SIZE = "clamp(40px, 8.5vw, 48px)";
+const KEY_GAP = "6px";
+const KEY_RADIUS = "14px";
+
 type KeyboardProps = {
   keyboardStatus: Record<string, LetterStatus>;
   onLetter: (letter: string) => void;
@@ -17,11 +22,6 @@ type KeyboardProps = {
   onSubmit: () => void;
   disabled?: boolean;
 };
-
-const keyBase =
-  "flex min-h-[44px] min-w-0 items-center justify-center rounded-lg border-0 font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation";
-const keyHeight = "h-[clamp(44px,7vh,56px)]";
-const keyFont = "text-[clamp(14px,3.2vw,18px)]";
 
 function LetterKey({
   letter,
@@ -39,10 +39,17 @@ function LetterKey({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      style={{
+        width: KEY_SIZE,
+        height: KEY_SIZE,
+        minWidth: KEY_SIZE,
+        minHeight: KEY_SIZE,
+        maxWidth: KEY_SIZE,
+        maxHeight: KEY_SIZE,
+        borderRadius: KEY_RADIUS,
+      }}
       className={cn(
-        keyBase,
-        keyHeight,
-        keyFont,
+        "flex shrink-0 items-center justify-center border-0 font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(14px,3vw,17px)]",
         !status &&
           "bg-[#d1d5db] text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.8)_inset,0_2px_0_0_rgba(0,0,0,0.1)] active:bg-[#c4c8cc]",
         status === "correct" &&
@@ -63,13 +70,11 @@ function ActionKey({
   children,
   onClick,
   disabled,
-  className,
   "aria-label": ariaLabel,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
-  className?: string;
   "aria-label": string;
 }) {
   return (
@@ -77,12 +82,16 @@ function ActionKey({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      style={{
+        height: KEY_SIZE,
+        minHeight: KEY_SIZE,
+        minWidth: "56px",
+        maxWidth: "90px",
+        borderRadius: KEY_RADIUS,
+      }}
       className={cn(
-        keyBase,
-        keyHeight,
-        keyFont,
-        "bg-[#9ca3af] text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] active:bg-[#8b92a0]",
-        className
+        "flex min-w-0 flex-1 items-center justify-center border-0 font-medium transition-[transform,box-shadow] duration-75 active:scale-[0.97] disabled:opacity-70 disabled:cursor-not-allowed select-none touch-manipulation text-[clamp(12px,2.8vw,15px)]",
+        "bg-[#9ca3af] text-white shadow-[0_2px_0_0_rgba(0,0,0,0.2)] active:bg-[#8b92a0]"
       )}
       aria-label={ariaLabel}
     >
@@ -104,55 +113,55 @@ export function Keyboard({
       style={{
         paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
         paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
-        paddingTop: "12px",
+        paddingTop: "8px",
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
       }}
     >
-      <div className="mx-auto w-full max-w-[560px] px-4 sm:px-5">
-        <div className="grid grid-cols-1 gap-2">
-          {/* Row 1: QWERTYUIOP - 10 columns */}
-          <div
-            className="grid gap-2"
-            style={{ gridTemplateColumns: "repeat(10, 1fr)" }}
-          >
-            {ROW1.map((letter) => (
-              <LetterKey
-                key={letter}
-                letter={letter}
-                status={keyboardStatus[letter]}
-                onClick={() => onLetter(letter)}
-                disabled={disabled}
-              />
-            ))}
-          </div>
+      <div
+        className="mx-auto flex w-full max-w-[540px] flex-col items-center"
+        style={{ gap: KEY_GAP, paddingLeft: "12px", paddingRight: "12px" }}
+      >
+        {/* Row 1: QWERTYUIOP - 10 keys */}
+        <div
+          className="flex justify-center"
+          style={{ gap: KEY_GAP }}
+        >
+          {ROW1.map((letter) => (
+            <LetterKey
+              key={letter}
+              letter={letter}
+              status={keyboardStatus[letter]}
+              onClick={() => onLetter(letter)}
+              disabled={disabled}
+            />
+          ))}
+        </div>
 
-          {/* Row 2: ASDFGHJKL - 9 keys centered with side gutters */}
-          <div
-            className="grid gap-2"
-            style={{
-              gridTemplateColumns: "minmax(0,0.5fr) repeat(9, 1fr) minmax(0,0.5fr)",
-            }}
-          >
-            <div aria-hidden />
-            {ROW2.map((letter) => (
-              <LetterKey
-                key={letter}
-                letter={letter}
-                status={keyboardStatus[letter]}
-                onClick={() => onLetter(letter)}
-                disabled={disabled}
-              />
-            ))}
-            <div aria-hidden />
-          </div>
+        {/* Row 2: ASDFGHJKL - 9 keys with inset (iOS-style) */}
+        <div
+          className="flex justify-center"
+          style={{ gap: KEY_GAP, paddingLeft: "24px", paddingRight: "24px" }}
+        >
+          {ROW2.map((letter) => (
+            <LetterKey
+              key={letter}
+              letter={letter}
+              status={keyboardStatus[letter]}
+              onClick={() => onLetter(letter)}
+              disabled={disabled}
+            />
+          ))}
+        </div>
 
-          {/* Row 3: Enter + ZXCVBNM + Backspace */}
-          <div
-            className="grid gap-2"
-            style={{
-              gridTemplateColumns: "1.5fr repeat(7, 1fr) 1.5fr",
-            }}
-          >
+        {/* Row 3: Enter + ZXCVBNM + Backspace (Enter/Backspace wider, same height) */}
+        <div
+          className="grid w-full max-w-[540px] items-center"
+          style={{
+            gap: KEY_GAP,
+            gridTemplateColumns: "1.5fr repeat(7, minmax(0, 1fr)) 1.5fr",
+          }}
+        >
+          <div className="flex items-center justify-start pr-0.5">
             <ActionKey
               onClick={onSubmit}
               disabled={disabled}
@@ -160,21 +169,24 @@ export function Keyboard({
             >
               Enter
             </ActionKey>
-            {ROW3.map((letter) => (
+          </div>
+          {ROW3.map((letter) => (
+            <div key={letter} className="flex items-center justify-center">
               <LetterKey
-                key={letter}
                 letter={letter}
                 status={keyboardStatus[letter]}
                 onClick={() => onLetter(letter)}
                 disabled={disabled}
               />
-            ))}
+            </div>
+          ))}
+          <div className="flex items-center justify-end pl-0.5">
             <ActionKey
               onClick={onBackspace}
               disabled={disabled}
               aria-label="Delete letter"
             >
-              <Delete className="h-6 w-6" aria-hidden />
+              <Delete className="h-5 w-5" aria-hidden />
             </ActionKey>
           </div>
         </div>

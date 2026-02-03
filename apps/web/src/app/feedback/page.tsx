@@ -126,7 +126,10 @@ export default function FeedbackPage() {
   const backLabel = "Back to Parents";
 
   return (
-    <main className="relative flex min-h-dvh flex-col overflow-hidden px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
+    <main
+      className="relative flex min-h-dvh flex-col overflow-y-auto px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}
+    >
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-24 left-[-12%] h-64 w-64 rounded-full bg-gradient-to-br from-teal-200/60 via-teal-100/40 to-transparent blur-3xl sm:h-72 sm:w-72" />
         <div className="absolute -bottom-24 right-[-10%] h-72 w-72 rounded-full bg-gradient-to-br from-amber-200/55 via-amber-100/35 to-transparent blur-3xl sm:h-80 sm:w-80" />

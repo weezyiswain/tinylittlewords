@@ -121,7 +121,7 @@
   html {
     height: 100%;
     min-height: -webkit-fill-available;
-    min-height: calc(100dvh + env(safe-area-inset-bottom, 34px));
+    min-height: 100dvh;
     background-color: #fafafa;
     overscroll-behavior-y: none;
     overscroll-behavior-x: contain;
@@ -137,19 +137,7 @@
     overscroll-behavior-x: contain;
     min-height: 100%;
     min-height: -webkit-fill-available;
-    min-height: calc(100dvh + env(safe-area-inset-bottom, 34px));
-  }
-  body::after {
-    content: "";
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: env(safe-area-inset-bottom, 34px);
-    background: #fafafa;
-    pointer-events: none;
-    z-index: -1;
+    min-height: 100dvh;
   }
 }
 

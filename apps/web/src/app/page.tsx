@@ -202,11 +202,7 @@ export default function Home() {
   return (
     <>
       <div
-        className="pointer-events-none fixed inset-0 -z-10"
-        style={{
-          bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))",
-          minHeight: "max(100dvh, 100svh)",
-        }}
+        className="pointer-events-none fixed inset-0 -z-10 min-h-[100dvh]"
         aria-hidden
       >
         <div className={cn("absolute inset-0", theme.bgBase)} aria-hidden />
@@ -234,8 +230,7 @@ export default function Home() {
         )}
       </div>
       <main
-        className="fixed inset-0 flex flex-col overflow-hidden bg-[#fafafa] pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))] sm:pt-[max(1.5rem,calc(env(safe-area-inset-top,0px)+1rem))]"
-        style={{ bottom: "calc(-1 * env(safe-area-inset-bottom, 34px))" }}
+        className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#fafafa]"
       >
       <Script
         id="home-structured-data"
@@ -246,7 +241,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="flex h-full w-full flex-col"
+        className="flex min-h-full w-full flex-col"
       >
         {showLoading ? (
           <div className="fixed inset-0 z-0 flex items-center justify-center px-4">
@@ -263,19 +258,22 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="shrink-0 w-full px-4 sm:px-8">
+            <header
+              className="shrink-0 w-full px-4 sm:px-8"
+              style={{ paddingTop: "max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))" }}
+            >
               <div className="mx-auto flex max-w-xl justify-center py-2 sm:py-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-700">
                   Tiny Little Words
                 </p>
               </div>
-            </div>
+            </header>
 
             <div
-              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-behavior-contain bg-[#fafafa]"
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden w-full overscroll-contain bg-[#fafafa]"
               style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
             >
-              <div className="mx-auto max-w-xl space-y-2.5 px-4 py-2 pb-[calc(2rem+env(safe-area-inset-bottom,34px))] sm:space-y-3 sm:px-8 sm:pb-[calc(2.5rem+env(safe-area-inset-bottom,34px))]">
+              <div className="mx-auto max-w-xl space-y-2.5 px-4 py-4 sm:space-y-3 sm:px-8 sm:py-6">
               <section
                 className={cn(
                   "overflow-hidden rounded-2xl border border-white/70 bg-white/90 p-4",
@@ -384,14 +382,25 @@ export default function Home() {
                 </div>
               </section>
 
-            <div className="w-full pt-4 sm:pt-6">
-              <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
+              </div>
+            </div>
+
+            <footer
+              className="shrink-0 w-full border-t border-white/60 bg-white/80 backdrop-blur"
+              style={{
+                paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
+                paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
+                paddingTop: "1rem",
+                paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)",
+              }}
+            >
+              <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-3">
                 <motion.button
                   type="button"
                   onClick={handleStart}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
-                    "w-2/3 min-w-[12rem] max-w-[18rem] rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "w-full max-w-md rounded-full bg-gradient-to-r px-5 py-4 text-lg font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     theme.ctaGradient,
                     theme.ctaShadow,
                     theme.ctaShadowHover
@@ -406,10 +415,7 @@ export default function Home() {
                   For parents
                 </Link>
               </div>
-            </div>
-
-              </div>
-            </div>
+            </footer>
           </>
         )}
       </motion.div>

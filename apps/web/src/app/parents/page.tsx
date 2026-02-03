@@ -80,7 +80,10 @@ export default function ParentsPage() {
   };
 
   return (
-    <main className="min-h-dvh bg-neutral-50 px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12">
+    <main
+      className="min-h-dvh bg-neutral-50 px-4 py-8 pt-[calc(env(safe-area-inset-top,0)+2rem)] sm:px-10 sm:py-12"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}
+    >
       <div className="mx-auto max-w-xl space-y-6">
         <div className="flex items-center">
           <Link
@@ -101,19 +104,28 @@ export default function ParentsPage() {
         </div>
 
         <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-neutral-900">About Tiny Little Words</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">About</h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Tiny Little Words is a word puzzle game built for brave readers ages 6–10. Kids pick a word length, choose a friendly buddy to cheer them on, and play through short, focused rounds. No sign-in required—just open and play.
+            Tiny Little Words started at home.
           </p>
           <p className="mt-3 text-sm text-neutral-600">
-            We&apos;re in an early phase and improving the app with feedback from families. Our goal is to make word practice feel fun and low-pressure.
+            Our kids kept wanting to join in when we played word puzzles, but most games are built for adults and move too fast for early readers. We wanted something that felt welcoming, calm, and made kids feel successful.
+          </p>
+          <p className="mt-3 text-sm text-neutral-600">
+            This app is designed to help children build confidence with spelling and reading through short, repeatable word practice. It&apos;s especially well suited for early readers, emerging spellers, and homeschool families who want flexible, low-pressure ways to practice language skills.
+          </p>
+          <p className="mt-3 text-sm text-neutral-600">
+            We&apos;re exploring ways to focus practice around meaningful topics (like animals, food, or sports) as well as foundational language concepts such as nouns and verbs. The goal isn&apos;t speed or scores—it&apos;s comfort, repetition, and steady progress.
           </p>
         </section>
 
         <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-neutral-900">Share with other parents</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            We&apos;re trying to learn as much as we can right now. If you know another parent who might want to try Tiny Little Words, feel free to share it with them.
+            We&apos;re learning by testing with real families. If you know someone who might enjoy trying this with their kids, you&apos;re welcome to pass it along.
+          </p>
+          <p className="mt-3 text-sm text-neutral-600">
+            Tiny Little Words is still in an early testing phase. Your feedback helps us decide what to improve, what to build next, and whether this is worth investing more time into long-term.
           </p>
           <Button
             type="button"

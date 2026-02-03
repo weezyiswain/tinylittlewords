@@ -595,13 +595,14 @@ function PlayPageContent() {
     );
   };
 
-  const renderHintAccess = () => (
+  const renderHintAccess = (compact?: boolean) => (
     <Sheet open={isHintSheetOpen} onOpenChange={setIsHintSheetOpen}>
       <SheetTrigger asChild>
         <button
           type="button"
           className={cn(
-            "inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-5 text-sm font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 sm:h-11",
+            "inline-flex shrink-0 items-center justify-center rounded-full border border-white/65 bg-white/85 px-4 text-sm font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+            compact ? "h-9 px-5" : "h-11 px-5 sm:h-11",
             theme.backButton,
             hintButtonHighlight && cn(theme.hintHighlight, "animate-bounce")
           )}
@@ -855,53 +856,31 @@ function PlayPageContent() {
       </div>
 
       <header
-        className="relative z-10 w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pb-3 sm:pl-6 sm:pr-6"
+        className="relative z-10 flex w-full shrink-0 items-center justify-between pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] pb-2 pt-3 sm:pl-6 sm:pr-6"
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
       >
-        <div className="mx-auto grid w-full max-w-3xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <Link
-            href="/"
-            className={cn(
-              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
-              theme.backButton
-            )}
-            aria-label="Back to puzzles"
-          >
-            <ChevronLeft className="h-5 w-5" aria-hidden />
-          </Link>
+        <Link
+          href="/"
+          className={cn(
+            "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/60 bg-white/85 text-muted-foreground transition hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2",
+            theme.backButton
+          )}
+          aria-label="Back to puzzles"
+        >
+          <ChevronLeft className="h-5 w-5" aria-hidden />
+        </Link>
 
-          <div
-            className={cn(
-              "flex min-h-[52px] w-full items-center gap-3 rounded-full border border-white/70 bg-white/85 px-4 py-2.5 backdrop-blur",
-              theme.statusCard
-            )}
-            aria-live="polite"
-            role="status"
-          >
-            <div
-              className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl shadow-[0_6px_14px_rgba(0,0,0,0.1)]",
-                avatar.bg
-              )}
-              aria-hidden
-            >
-              {avatar.emoji}
-            </div>
-            <div>
-              <p className="text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
-                Playing with
-              </p>
-              <p className="text-sm font-semibold text-foreground">
-                Your buddy
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-2">
-            {renderHintAccess()}
-            {renderHintHelp(undefined, "muted")}
-          </div>
+        <div
+          className={cn(
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/85 text-2xl shadow-[0_6px_16px_rgba(0,0,0,0.1)] backdrop-blur sm:h-14 sm:w-14",
+            avatar.bg
+          )}
+          aria-hidden
+        >
+          {avatar.emoji}
         </div>
+
+        {renderHintHelp(undefined, "muted")}
       </header>
 
       <section className="relative z-10 flex flex-1 flex-col overflow-hidden">
@@ -1118,9 +1097,12 @@ function PlayPageContent() {
       </section>
 
       <footer className="relative z-10 w-full shrink-0 bg-transparent">
-        <div className="w-full pt-3">
+        <div className="w-full pt-2">
           <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center gap-2 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
             <StatsDisplay refreshTrigger={statsRefresh} variant="compact" />
+          </div>
+          <div className="flex justify-center py-2">
+            {renderHintAccess(true)}
           </div>
           <Keyboard
             keyboardStatus={keyboardStatus}
